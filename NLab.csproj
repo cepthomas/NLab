@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ClassHierarchy\**" />
+    <EmbeddedResource Remove="ClassHierarchy\**" />
+    <None Remove="ClassHierarchy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="sys_int.cs" />
+    <Compile Remove="val_type.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="ClassHierarchy\ClassHierarchy.csproj" />
+  </ItemGroup>
+
+</Project>

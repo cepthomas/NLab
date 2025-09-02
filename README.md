@@ -1,2 +1,6 @@
 # NLab
-A boring place to play around with more esoteric .NET aspects.
+
+Just a big messy area. These are not the codes you are looking for.
+
+![owk](owk.jpg)
+
