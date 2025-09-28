@@ -36,6 +36,7 @@ namespace NLab
             // 
             // Output
             // 
+            Output.Font = new Font("Cascadia Code", 9.163636F, FontStyle.Regular, GraphicsUnit.Point, 0);
             Output.Location = new Point(43, 45);
             Output.Name = "Output";
             Output.Size = new Size(679, 369);

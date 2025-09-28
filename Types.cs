@@ -4,20 +4,10 @@ using System.Runtime.CompilerServices;
 
 namespace NLab
 {
-    /// <summary>Lua script syntax error.</summary>
-    public class SyntaxException(string message) : Exception(message) { }
-
-    /// <summary>Channel state.</summary>
-    public enum ChannelState { Normal, Solo, Mute }
-
-
     // All struct types implicitly inherit from the class System.ValueType (§16.4.3).
     // Function members in a struct cannot be abstract or virtual, and the override modifier is allowed only to override methods inherited from System.ValueType.
-
-
     
     // Implicit conversions should only be used when the conversion is inherently safe and does not involve potential data loss or exceptions. If a conversion might fail or lose information, an explicit operator is more appropriate.
-
 
     // A user-defined type can define a custom implicit or explicit conversion from or to another type, provided a 
     // standard conversion doesn't exist between the same two types. 

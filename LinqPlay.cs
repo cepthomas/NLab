@@ -5,7 +5,7 @@ namespace NLab
     {
 
 
-#if _SWITCH
+#if _LP
 
         public void KillAll()
         {
