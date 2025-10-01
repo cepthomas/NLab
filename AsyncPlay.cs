@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -10,436 +11,167 @@ using System.Threading.Tasks;
 
 
 
-//https://blog.stephencleary.com/2012/02/async-and-await.html
-
-//https://devblogs.microsoft.com/dotnet/asyncawait-faq/
-
-// To achieve the benefits of asynchrony, can’t I just wrap my synchronous methods in calls to Task.Run?
-// -- It depends on your goals for why you want to invoke the methods asynchronously. If your goal is simply to offload the 
-// work you’re doing to another thread, so as to, for example, maintain the responsiveness of your UI thread, then sure. 
-// If your goal is to help with scalability, then no, just wrapping a synchronous call in a Task.Run won’t help. 
-
-// For more information, see Should I expose asynchronous wrappers for synchronous methods? And if from your UI thread you want 
-// to offload work to a worker thread, and you use Task.Run to do so, you often typically want to do some work back on the 
-// UI thread once that background work is done, and these language features make that kind of coordination easy and seamless.
-
-
-//https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap
-
-
 namespace NLab
 {
-    //https://stackoverflow.com/questions/14455293/how-and-when-to-use-async-and-await
-    public class AAAA
-    {
-
-        // I don't understand why this method must be marked as `async`.
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            Task<int> access = DoSomethingAsync();
-            // task independent stuff here
-
-            // this line is reached after the 5 seconds sleep from 
-            // DoSomethingAsync() method. Shouldn't it be reached immediately? 
-            int a = 1;
-
-            // from my understanding the waiting should be done here.
-            int x = await access;
-        }
-
-        async Task<int> DoSomethingAsync()
-        {
-            // is this executed on a background thread?
-            System.Threading.Thread.Sleep(5000);
-            return 1;
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        // Here's an example on which I hope I can explain some of the high-level details that are going on:
-
-        public async Task MyMethodAsync()
-        {
-            Task<int> longRunningTask = LongRunningOperationAsync();
-            // independent work which doesn't need the result of LongRunningOperationAsync can be done here
-
-            //and now we call await on the task 
-            int result = await longRunningTask;
-            //use the result 
-            Console.WriteLine(result);
-        }
-
-        public async Task<int> LongRunningOperationAsync() // assume we return an int from this long running operation 
-        {
-            await Task.Delay(1000); // 1 second delay
-            return 1;
-        }
-    }
-
 
     public class AsyncPlay
     {
 
-        //  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
-        const int packet_length = 2;  // user defined packet length
+        public event EventHandler<NotifEventArgs>? Notif;
 
-        void DoAsync()
+        readonly long _startTick = Stopwatch.GetTimestamp();
+
+
+        public void Go()
         {
-            //// Tweak config.
-            //var config = BuildConfig("tcp 127.0.0.1 59120");
-            //File.WriteAllLines(cfile, config);
-            //RunServerAsync();
-            //Go(cfile);
-        }
+            //using var scp = new Scoper("Go");
+            
+            // IO bound op. Use Async versions of calls. Sys calls should have them.
+            File.ReadAllLinesAsync("fffff");
 
-        async void RunServerAsync()
-        {
-            var listner = new TcpListener(IPAddress.Any, 59120);
-            listner.Start();
-            try
-            {
-                while (true)
-                {
-                    // was await Accept(await listner.AcceptTcpClientAsync());
-                    TcpClient client = await listner.AcceptTcpClientAsync();
-                    await Accept(client);
-                }
-            }
-            finally
-            {
-                listner.Stop();
-            }
-        }
-
-        async Task Accept(TcpClient client)
-        {
-            await Task.Yield();
-            try
-            {
-                using (client)
-                using (NetworkStream n = client.GetStream())
-                {
-                    byte[] data = new byte[packet_length];
-                    int bytesRead = 0;
-                    int chunkSize = 1;
-
-                    while (bytesRead < data.Length && chunkSize > 0)
-                    {
-                        bytesRead += chunkSize = await n.ReadAsync(data, bytesRead, data.Length - bytesRead);
-                    }
-
-                    // get data
-                    string str = Encoding.Default.GetString(data);
-                    Console.WriteLine("[server] received : {0}", str);
-
-                    // To do
-                    // ...
-
-                    // send the result to client
-                    string send_str = "server_send_test";
-                    byte[] send_data = Encoding.ASCII.GetBytes(send_str);
-                    await n.WriteAsync(send_data, 0, send_data.Length);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        public void Callback()
-        {
-            Console.WriteLine("Everything done");
         }
 
 
-        public void Run()
+
+        //when you await a built-in awaitable (Task), then the awaitable will capture the current “context” and
+        //later apply it to the remainder of the async method. What exactly is that “context”?
+        //    If you’re on a UI thread, then it’s a UI context.
+        //    If you’re responding to an ASP.NET request, then it’s an ASP.NET request context.
+        //    Otherwise, it’s usually a thread pool context.
+        //A good rule of thumb is to use ConfigureAwait(false) unless you know you do need the context.
+
+        // WinForms example (it works exactly the same for WPF).
+        private async void UiButton_Click(object sender, EventArgs e)
         {
-            var workers = new List<IWorker> { new Worker(), new Worker(), new Worker() };
-            var tasks = workers.Select(t => t.DoWorkAsync("some data"));
-            Task.WhenAll(tasks).ContinueWith(task => Callback());
-            Console.WriteLine("Waiting");
-        }
-    }
+            // Since we asynchronously wait, the UI thread is not blocked by the file download.
+            // ConfigureAwaitOptions to not restore the original context.
+            //            await MyFuncAsync("download fileNameTextBox.Text").ConfigureAwait(false); //  (ConfigureAwaitOptions.None);
 
-
-    // You're looking for Task.WhenAll. Create a bunch of Tasks that do what you want them to, then wait on all of the tasks and ContinueWith your callback. I split out an async version of the DoWork method - if you're always going to be calling it asynchronously you don't necessarily need to do that.
-    public interface IWorker
-    {
-        Task DoWorkAsync(string data);
-        void DoWork(string data);
-    }
-
-    public class Worker : IWorker
-    {
-        public Task DoWorkAsync(string data)
-        {
-            return Task.Run(() => DoWork(data));
+            // Since we resume on the UI context, we can directly access UI elements.   boom?
+            Print("File downloaded!");
         }
 
-        public void DoWork(string data)
+
+
+
+
+
+
+        // >>> do this instead:
+        //One of the easier methods is to use Task.Run, very similar to your existing code.
+        //However, I do not recommend implementing a CalculateAsync method since that implies the
+        //processing is asynchronous (which it is not). Instead, use Task.Run at the point of the call:
+        async Task MakeRequest()
         {
-            Console.WriteLine(data);
-            Thread.Sleep(100);
-        }
-    }
+            // do some stuff
+            int i = -1;
+            var task = Task.Run(() => { return Calculate("myInput"); });
 
-    public class Runner
-    {
-        public void Callback()
+            // do other stuff
+            var myOutput = await task;
+
+            // some more stuff
+        }
+        int Calculate(string s)
         {
-            Console.WriteLine("Everything done");
+            return s.Length;
         }
 
-        public void Run()
+
+
+        //You shouldn't make the async method exist at all. It's a fake async method that actually blocks.
+        //Let the users choose if they want this to run on a different thread by doing Task.Run themselves.
+        //Don't pretend it's async, you'd just be lying. 
+        //Simply return Task.FromResult once method is done synchronously and there you have it.
+        //an async task MAY complete asynchronously, but doesn't have to. 
+
+
+
+
+        public void CpuBoundSyncOperation()
         {
-            var workers = new List<IWorker> { new Worker(), new Worker(), new Worker() };
-            var tasks = workers.Select(t => t.DoWorkAsync("some data"));
-            Task.WhenAll(tasks).ContinueWith(task => Callback());
-            Console.WriteLine("Waiting");
-        }
-    }
+            // CPU bound ops can be wrapped.
+            // if you're writing CPU-bound methods provide both sync and async versions to be nice!
 
-    class YetMore
-    {
-        async void Go()
+        }
+
+
+        public void IoBoundSyncOperation()
         {
-            // ... inside a method or class
-
-            TcpClient client = new TcpClient();
-            await client.ConnectAsync("server_ip_address", 1234);// port_number);
-            NetworkStream stream = client.GetStream();
-
-            //////////////
-
-            byte[] buffer = new byte[1024]; // Or a suitable buffer size
-            int bytesRead;
-
-            // Run this in a separate task or thread
-            await Task.Run(async () =>
-            {
-                try
-                {
-                    while (client.Connected) // Or a cancellation token for graceful shutdown
-                    {
-                        bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-
-                        if (bytesRead == 0)
-                        {
-                            // Connection closed by remote host
-                            break;
-                        }
-
-                        // Process the received data
-                        string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        Console.WriteLine($"Received: {receivedData}");
-
-                        // You might need to handle partial messages if your protocol sends them
-                        // For example, if messages are length-prefixed or terminated by a specific character.
-                    }
-                }
-                catch (IOException ex)
-                {
-                    Console.WriteLine($"Network error: {ex.Message}");
-                    // Handle connection loss or other network issues
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred during continuous read: {ex.Message}");
-                }
-                finally
-                {
-                    stream.Close();
-                    client.Close();
-                }
-            });
+            //
+            
         }
+
+
+        // 
+        public async Task<int> MyFunc1Async(string s)
+        {
+            Print($"MyFunc1Async() enter");
+
+            await Task.Delay(100);
+
+            Print($"MyFunc1Async() 2");
+
+            return s.Length;
+        }
+
+        //And if from your UI thread you want to offload work to a worker thread, and you use Task.Run to do so,
+        //you often typically want to do some work back on the UI thread once that background work is done,
+        //and these language features make that kind of coordination easy and seamless.
+        async Task RunOnThreadAsync()
+        {
+
+        }
+
+
+        // We can await Tasks, regardless of where they come from.
+        public async Task ComposeAsync()
+        {
+            await RunOnThreadAsync();
+            await MyFunc1Async("gogogo");
+        }
+
+        //Alternatively, if it works well with your code, you can use the Parallel type, i.e., Parallel.For,
+        //Parallel.ForEach, or Parallel.Invoke. The advantage to the Parallel code is that the request thread
+        //is used as one of the parallel threads, and then resumes executing in the thread context
+        //(there's less context switching than the async example):
+        //void MakeRequest()
+        //{
+        //  Parallel.Invoke(() => Calculate(myInput1),
+        //      () => Calculate(myInput2),
+        //      () => Calculate(myInput3));
+        //}
+
+        void Print(string msg)
+        {
+            Notif?.Invoke(this, new(Cat.None, msg));
+        }
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////// TODO? ///////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //There are also other awaitable types: special methods such as “Task.Yield” return awaitables that are not Tasks.
+        //You can also create your own awaitable(usually for performance reasons), or use extension methods to make a non-awaitable type awaitable.
+
+
+        //By using concurrent composition(Task.WhenAll or Task.WhenAny), you can perform simple concurrent operations.
+        //You can also use these methods along with Task.Run to do simple parallel computation.
+
+
+        //Old           New         Description
+        //task.Wait     await task  Wait/await for a task to complete
+        //task.Result   await task  Get the result of a completed task
+        //Task.WaitAny  await Task.WhenAny  Wait/await for one of a collection of tasks to complete
+        //Task.WaitAll  await Task.WhenAll  Wait/await for every one of a collection of tasks to complete
+        //Thread.Sleep  await Task.Delay    Wait/await for a period of time
+        //Task ctor     Task.Run or TaskFactory.StartNew    Create a code-based task
+
+
+        //The normal way to report errors from tasks is by placing an exception on the task.
+        //In the most common scenario - an async method that returns Task - your code can just throw an exception
+        //and the async machinery will catch that exception and place it on the returned Task for you.So your code
+        //can just use throw, try, and catch exactly like normal and it will all work.
     }
 }
-
-
-
-
-
-// Various socket async
-
-/*
-/////////////////////////////////////////////////////////////
-var listener = new TcpListener(System.Net.IPAddress.Any, 55555);
-listener.Start();
-var cts = new CancellationTokenSource(400);
-var sw = Stopwatch.StartNew();
-
-try
-{
-    await listener.AcceptTcpClientAsync(cts.Token);
-}
-catch(Exception e)
-{
-    Console.WriteLine(e);
-}
-finally
-{
-    sw.Stop();
-    Console.WriteLine(sw.Elapsed);
-}
-listener.Stop();
-
-
-//////////////////////////////////////////////////////////////////
-// well, dunno. maybe the code u where u await is already in an unawaited task
-// this for example doesnt make VS pause execution
-
-_ = Task.Run(async () =>  // why: https://stackoverflow.com/a/22645114
-{
-    var listener = new TcpListener(System.Net.IPAddress.Any, 55555);
-    listener.Start();
-
-    var cts = new CancellationTokenSource(400);
-    var sw = Stopwatch.StartNew();
-    await listener.AcceptTcpClientAsync(cts.Token);
-    sw.Stop();
-    Console.WriteLine(sw.Elapsed);
-
-    listener.Stop();
-});
-
-
-//using await Task.Run(...); instead makes it pause
-
-
-
-
-//////////////////////////////////////////////////////////////////////
-//  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
-
-
-const int packet_length = 2;  // user defined packet length
-
-async void RunServerAsync()
-{
-    var listner = new TcpListener(IPAddress.Any, 9999);
-    listner.Start();
-    try
-    {
-        while (true)
-        {
-            TcpClient client = await listner.AcceptTcpClientAsync();
-
-            await Accept(client);
-
-
-            // await Accept(await listner.AcceptTcpClientAsync());
-        }
-    }
-    finally { listner.Stop(); }
-}
-
-
-
-async Task Accept(TcpClient client)
-{
-    await Task.Yield(); 
-    try
-    {
-        using(client)
-        using(NetworkStream n = client.GetStream())
-        {
-            byte[] data = new byte[packet_length];
-            int bytesRead = 0;
-            int chunkSize = 1;
-
-            while (bytesRead < data.Length && chunkSize > 0)
-                bytesRead += chunkSize = 
-                    await n.ReadAsync(data, bytesRead, data.Length - bytesRead);
-
-            // get data
-            string str = Encoding.Default.GetString(data);
-            Console.WriteLine("[server] received : {0}", str);
-
-            // To do
-            // ...
-
-            // send the result to client
-            string send_str = "server_send_test";
-            byte[] send_data = Encoding.ASCII.GetBytes(send_str);
-            await n.WriteAsync(send_data, 0, send_data.Length);
-
-        }
-    }
-    catch(Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////
-//https://gist.github.com/Maxwe11/cf8cc6331ad73671846e
-////////////////////////////////////////////////////////////////////////
-
-public class Program_not
-{
-    public static void Main(string[] args)
-    {
-        MainAsync().GetAwaiter().GetResult();
-    }
-
-    static async Task MainAsync()
-    {
-        Console.WriteLine("Starting...");
-        var server = new TcpListener(IPAddress.Parse("0.0.0.0"), 66);
-        server.Start();
-        Console.WriteLine("Started.");
-        while (true)
-        {
-            var client = await server.AcceptTcpClientAsync().ConfigureAwait(false);
-            var cw = new ClientWorking(client, true);
-            Task.Run((Func<Task>)cw.DoSomethingWithClientAsync);
-        }
-    }
-}
-
-class ClientWorking
-{
-    TcpClient _client;
-    bool _ownsClient;
-
-    public ClientWorking(TcpClient client, bool ownsClient)
-    {
-        _client = client;
-        _ownsClient = ownsClient;
-    }
-
-    public async Task DoSomethingWithClientAsync()
-    {
-        try
-        {
-            using (var stream = _client.GetStream())
-            {
-                using (var sr = new StreamReader(stream))
-                using (var sw = new StreamWriter(stream))
-                {
-                    await sw.WriteLineAsync("Hi. This is x2 TCP/IP easy-to-use server").ConfigureAwait(false);
-                    await sw.FlushAsync().ConfigureAwait(false);
-                    var data = default(string);
-                    while (!((data = await sr.ReadLineAsync().ConfigureAwait(false)).Equals("exit", StringComparison.OrdinalIgnoreCase)))
-                    {
-                        await sw.WriteLineAsync(data).ConfigureAwait(false);
-                        await sw.FlushAsync().ConfigureAwait(false);
-                    }
-                }
-
-            }
-        }
-        finally
-        {
-            if (_ownsClient && _client != null)
-            {
-                (_client as IDisposable).Dispose();
-                _client = null;
-            }
-        }
-    }
-}
-
-*/
