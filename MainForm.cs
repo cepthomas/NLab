@@ -48,13 +48,11 @@ namespace NLab
         [LogMethodExecution("testing 123")]
         void RunTestMethod(string s)
         {
-            Print($"MainForm.TestMethod({s}) entry");
-
+            Print($"MainForm.RunTestMethod({s}) entry");
             using var sc = new Scoper("1-1-1-1");
-
-            Console.WriteLine(s);
-
-            Print($"MainForm.TestMethod({s}) exit");
+            int l = s.Length;
+            Print($"string is {l} long")
+            Print($"MainForm.RunTestMethod() exit");
         }
 
         public void Print(string s)

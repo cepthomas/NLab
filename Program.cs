@@ -5,9 +5,7 @@ namespace NLab
 {
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
+        /// <summary>The main entry point for the application.</summary>
         [STAThread]
         static void Main()
         {
@@ -16,5 +14,12 @@ namespace NLab
             ApplicationConfiguration.Initialize();
             Application.Run(new MainForm());
         }
+
+
+        // static void Main(string[] args)
+        // {
+        //     using var app = new App();
+        // }
+
     }
 }

@@ -2,27 +2,28 @@
 
   <PropertyGroup>
 
-    <OutputType>WinExe</OutputType>
+    <!-- Forms -->
+    <!-- <OutputType>WinExe</OutputType> -->
+    <!-- <UseWindowsForms>true</UseWindowsForms> -->
+    <!-- <TargetFramework>net8.0-windows</TargetFramework> -->
+
+    <!-- Terminal -->
+    <OutputType>Exe</OutputType>
+    <UseWindowsForms>false</UseWindowsForms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <TargetFramework>net8.0-windows</TargetFramework>
+
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
+    <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
+    <!-- <NoWarn>1701;1702;CA1816;CA1822</NoWarn> -->
 
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="ClassHierarchy\**" />
-    <EmbeddedResource Remove="ClassHierarchy\**" />
-    <None Remove="ClassHierarchy\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="sys_int.cs" />
-    <Compile Remove="val_type.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="ClassHierarchy\ClassHierarchy.csproj" />
+    <Reference Include="Ephemera.NBagOfTricks">
+      <HintPath>lib\Ephemera.NBagOfTricks.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
