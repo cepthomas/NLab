@@ -14,7 +14,7 @@ namespace NLab
     {
         static void Main(string[] args)
         {
-            using var app = new App();
+            var app = new App();
         }
         
         readonly long _startTick = Stopwatch.GetTimestamp();
