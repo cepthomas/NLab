@@ -14,11 +14,11 @@ namespace NLab
     /// <summary>General categories, mainly for logging.</summary>
     public enum Cat { None, Error, Info }
 
-    // /// <summary>Comm has something to tell the user.</summary>
-    // public class NotifEventArgs(Cat cat, string msg) : EventArgs
-    // {
-    //     public Cat Cat { get; init; } = cat;
-    //     public string Message { get; init; } = msg;
-    // }
+    /// <summary>Comm has something to tell the user.</summary>
+    public class NotifEventArgs(Cat cat, string msg) : EventArgs
+    {
+        public Cat Cat { get; init; } = cat;
+        public string Message { get; init; } = msg;
+    }
     #endregion
 }

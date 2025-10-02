@@ -32,13 +32,13 @@ namespace ClassHierarchy
 
     public class Chart : Element
     {
-        public List<ChartSeries> DataSeries { get; set; } = new List<ChartSeries>();
+        public List<ChartSeries> DataSeries { get; set; } = [];
 
-        public string TitleText { get; set; } = Definitions.UNKNOWN_STRING;
+        public string TitleText { get; set; }
 
-        public string XAxisLabelText { get; set; } = Definitions.UNKNOWN_STRING;
+        public string XAxisLabelText { get; set; }
 
-        public string YAxisLabelText { get; set; } = Definitions.UNKNOWN_STRING;
+        public string YAxisLabelText { get; set; }
     }
 
     public class Table : Element
@@ -69,15 +69,6 @@ namespace ClassHierarchy
 
         public List<Chart> Charts { get; set; }
     }
-
-
-    public ClassHierarchy()
-    {
-        // Create an instance of this.
-
-    }
-
-
 
 
 
