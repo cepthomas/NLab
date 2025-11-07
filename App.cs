@@ -12,7 +12,7 @@ namespace NLab
 {
     public class App
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var app = new App();
         }
