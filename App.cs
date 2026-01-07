@@ -110,7 +110,7 @@ namespace NLab
             //        Cat.Error => "!!!",
             //        Cat.Info => "---",
             //        Cat.None => "---",
-            //        _ => throw new NotImplementedException(),
+            //        _ => "???"
             //    };
 
             //    var s = $"{sec:000.000} {scat} {text}{Environment.NewLine}";

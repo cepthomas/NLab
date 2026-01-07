@@ -32,7 +32,7 @@ namespace NLab
         {
             if (digit > 9)
             {
-                throw new ArgumentOutOfRangeException(nameof(digit), "Digit cannot be greater than nine.");
+                throw new ArgumentOutOfRangeException("Digit cannot be greater than nine.");
             }
             this.digit = digit;
         }

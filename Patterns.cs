@@ -17,7 +17,7 @@ namespace NLab
             {
                 -1 => "NoPatch",
                 >= 0 and < MAX_MIDI => _instrumentNames[which],
-                _ => throw new ArgumentOutOfRangeException(nameof(which)),
+                _ => throw new ArgumentException(nameof(which)),
             };
             return ret;
         }
@@ -105,7 +105,7 @@ namespace NLab
 
     //     private PackedValue(ushort val)
     //     {
-    //          if(val >= (1<<12)) throw new ArgumentOutOfRangeException("val");
+    //          if(val >= (1<<12)) throw new ArgumentException("val");
     //          this._value = val;
     //     }
 
