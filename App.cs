@@ -60,27 +60,14 @@ namespace NLab
             //double msec = 1000.0 * (tick - _startTick) / Stopwatch.Frequency;
             text = $"{sec:000.000} {text}{Environment.NewLine}";
 
-            var catColor = cat switch
+            ConsoleColor? catColor = cat switch
             {
-                Cat.Error => ConsoleColorEx.Red,
-                Cat.Info => ConsoleColorEx.Cyan,
-                _ => ConsoleColorEx.None
+                Cat.Error => ConsoleColor.Red,
+                Cat.Info => ConsoleColor.Cyan,
+                _ => null
             };
 
-            // //  If color not explicitly specified, look for text matches.
-            // if (catColor == ConsoleColorEx.None)
-            // {
-            //     foreach (var m in _config.Matchers)
-            //     {
-            //         if (text.Contains(m.Key)) // faster than compiled regexes
-            //         {
-            //             catColor = m.Value;
-            //             break;
-            //         }
-            //     }
-            // }
-
-            if (catColor != ConsoleColorEx.None)
+            if (catColor != null)
             {
                 Console.ForegroundColor = (ConsoleColor)catColor;
             }
