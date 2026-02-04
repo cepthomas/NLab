@@ -147,9 +147,6 @@
             <param name="y"></param>
             <returns></returns>
         </member>
-        <member name="T:Ephemera.NBagOfTricks.ConsoleColorEx">
-            <summary>ConsoleColor variation with None added.</summary>
-        </member>
         <member name="M:Ephemera.NBagOfTricks.ColorUtils.ColorFromAnsi(System.String)">
             <summary>
             Decode ansi escape sequence arguments. TODO AnsiFromColor()
@@ -198,6 +195,21 @@
             <param name="one"></param>
             <param name="two"></param>
             <returns></returns>
+        </member>
+        <member name="T:Ephemera.NBagOfTricks.IConsole">
+            <summary>
+            Interface for consoles. Subset of System.Console.
+            </summary>
+        </member>
+        <member name="T:Ephemera.NBagOfTricks.RealConsole">
+            <summary>
+            The real console. Mainly pass-through for interface members.
+            </summary>
+        </member>
+        <member name="T:Ephemera.NBagOfTricks.MockConsole">
+            <summary>
+            A mock Console suitable for testing by simulating input and capturing output.
+            </summary>
         </member>
         <member name="T:Ephemera.NBagOfTricks.TimeIt">
             <summary>Simple profiler.</summary>
@@ -288,11 +300,29 @@
         <member name="T:Ephemera.NBagOfTricks.IniReader">
             <summary>Process the ini file.</summary>
         </member>
-        <member name="P:Ephemera.NBagOfTricks.IniReader.Contents">
+        <member name="F:Ephemera.NBagOfTricks.IniReader._contents">
             <summary>What's in the file.</summary>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.IniReader.#ctor(System.String)">
-            <summary>Do it.</summary>
+        <member name="M:Ephemera.NBagOfTricks.IniReader.GetSectionNames">
+            <summary>All section names</summary>
+            <returns>Names</returns>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.IniReader.GetValues(System.String)">
+            <summary>Get values for the section name.</summary>
+            <param name="name"></param>
+            <returns>The section contents or throws if name is invalid.</returns>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.IniReader.ParseFile(System.String)">
+            <summary>
+            Process an ini file.
+            </summary>
+            <param name="fn"></param>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.IniReader.ParseString(System.String)">
+            <summary>
+            Process an ini string.
+            </summary>
+            <param name="s">Input</param>
         </member>
         <member name="T:Ephemera.NBagOfTricks.JsonColorConverter">
             <summary>Serialize prettier.</summary>
@@ -738,111 +768,6 @@
             Resource clean up.
             </summary>
         </member>
-        <member name="T:Ephemera.NBagOfTricks.MusicDefinitions">
-            <summary>Definitions for use inside scripts. For doc see MusicDefinitions.md.</summary>
-        </member>
-        <member name="F:Ephemera.NBagOfTricks.MusicDefinitions._chordsScales">
-            <summary>The chord/scale note definitions. Key is chord/scale name, value is list of constituent notes.</summary>
-        </member>
-        <member name="F:Ephemera.NBagOfTricks.MusicDefinitions.NOTES_PER_OCTAVE">
-            <summary>all the notes.</summary>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.#cctor">
-            <summary>
-            Load chord and scale definitions.
-            </summary>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.FormatDoc">
-            <summary>
-            Make markdown content from the definitions.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="F:Ephemera.NBagOfTricks.MusicDefinitions._noteNames">
-            <summary>All possible note names and aliases.</summary>
-        </member>
-        <member name="F:Ephemera.NBagOfTricks.MusicDefinitions._naturals">
-            <summary>Helpers.</summary>
-        </member>
-        <member name="F:Ephemera.NBagOfTricks.MusicDefinitions._intervals">
-            <summary>Helpers.</summary>
-        </member>
-        <member name="F:Ephemera.NBagOfTricks.MusicDefinitions._chordDefs">
-            <summary>All the builtin chord defs.</summary>
-        </member>
-        <member name="F:Ephemera.NBagOfTricks.MusicDefinitions._scaleDefs">
-            <summary>All the builtin scale defs.</summary>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.NoteNumberToName(System.Int32)">
-            <summary>
-            Convert note number into name.
-            </summary>
-            <param name="inote"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.NoteNameToNumber(System.String)">
-            <summary>
-            Convert note name into number.
-            </summary>
-            <param name="snote">The root of the note without octave.</param>
-            <returns>The number or -1 if invalid.</returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.GetNotesFromString(System.String)">
-            <summary>
-            Parse note or notes from input value.
-            </summary>
-            <param name="noteString">Standard string to parse.</param>
-            <returns>List of note numbers - empty if invalid.</returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.IsNatural(System.Int32)">
-            <summary>
-            Is it a white key?
-            </summary>
-            <param name="notenum">Which note</param>
-            <returns>True/false</returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.SplitNoteNumber(System.Int32)">
-            <summary>
-            Split a midi note number into root note and octave.
-            </summary>
-            <param name="notenum">Absolute note number</param>
-            <returns>tuple of root and octave</returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.GetInterval(System.String)">
-            <summary>
-            Get interval offset from name.
-            </summary>
-            <param name="sinterval"></param>
-            <returns>Offset or -1 if invalid.</returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.GetInterval(System.Int32)">
-            <summary>
-            Get interval name from note number offset.
-            </summary>
-            <param name="iint">The name or empty if invalid.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.FormatNotes(System.Collections.Generic.List{System.Int32})">
-            <summary>
-            Try to make a note and/or chord string from the param. If it can't find a chord return the individual notes.
-            </summary>
-            <param name="notes"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.AddChordScale(System.String,System.String)">
-            <summary>
-            Add a new chord or scale definition.
-            </summary>
-            <param name="name">which</param>
-            <param name="notes">what</param>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.MusicDefinitions.GetChordScale(System.String)">
-            <summary>
-            Get a defined chord or scale definition.
-            </summary>
-            <param name="name">which</param>
-            <returns>The list of notes or empty if invalid.</returns>
-        </member>
         <member name="T:Ephemera.NBagOfTricks.PNUT.OutputFormat">
             <summary>
             Generate a human readable or junit format output.
@@ -891,7 +816,17 @@
             Specific exception type.
             </summary>
         </member>
+        <member name="M:Ephemera.NBagOfTricks.PNUT.AssertException.#ctor(System.String,System.String,System.Int32)">
+            <summary>
+            Specific exception type.
+            </summary>
+        </member>
         <member name="T:Ephemera.NBagOfTricks.PNUT.TestFailException">
+            <summary>
+            Specific exception type.
+            </summary>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestFailException.#ctor(System.String,System.Int32)">
             <summary>
             Specific exception type.
             </summary>
@@ -1030,7 +965,7 @@
         </member>
         <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_ASSERT``1(``0,``0,System.String,System.Int32)">
             <summary>
-            Prints the condition and gens assert/exception.
+            Prints the condition and gens assert exception.
             </summary>
             <typeparam name="T"></typeparam>
             <param name="value1"></param>
@@ -1122,6 +1057,25 @@
             </summary>
             <param name="value1"></param>
             <param name="value2"></param>
+            <param name="file"></param>
+            <param name="line"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_THROWS(System.Type,System.Action,System.String,System.Int32)">
+            <summary>
+            Does the Action code throw?
+            </summary>
+            <param name="exType"></param>
+            <param name="act"></param>
+            <param name="file"></param>
+            <param name="line"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_THROWS_NOT(System.Action,System.String,System.Int32)">
+            <summary>
+            Does the Action code not throw?
+            </summary>
+            <param name="act"></param>
             <param name="file"></param>
             <param name="line"></param>
             <returns></returns>
@@ -1371,16 +1325,6 @@
             Higher level tools.
             </summary>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.Tools.MakeExportFileName(System.String,System.String,System.String,System.String)">
-            <summary>
-            Create a new clean filename for export. Creates path if it doesn't exist.
-            </summary>
-            <param name="path">Export path</param>
-            <param name="baseFn">Root of the new file name</param>
-            <param name="mod">Modifier</param>
-            <param name="ext">File extension</param>
-            <returns></returns>
-        </member>
         <member name="M:Ephemera.NBagOfTricks.Tools.ShowReadme(System.String)">
             <summary>
             Display the application readme.
@@ -1401,9 +1345,24 @@
             <returns>Valid html.</returns>
         </member>
         <member name="M:Ephemera.NBagOfTricks.Tools.ExecuteLuaCode(System.String)">
-            <summary>Execute a chunk of lua code (not file).</summary>
+            <summary>
+            Execute a chunk of lua code (not file).
+            </summary>
             <param name="scode">The code</param>
             <returns>Exit code, stdout</returns>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.Tools.RunScript(System.String,System.Action{System.String},System.Action{System.String},System.IO.TextReader)">
+            <summary>
+            Run a script in external process. Handles py/lua/ps1/cmd/bat. This is primarily to be used as a
+            run-to-completion format. Currently there is no clean way to kill a running script or to support
+            continuous input.
+            Liberally borrowed from http://csharptest.net/532/using-processstart-to-capture-console-output/index.html
+            </summary>
+            <param name="fn">Script name</param>
+            <param name="output">What to do with script stdout</param>
+            <param name="error">What to do with script stderr</param>
+            <param name="input">Optional for stdin - one-shot</param>
+            <returns>Script return code</returns>
         </member>
         <member name="M:Ephemera.NBagOfTricks.Tools.SniffBin(System.String,System.Int32)">
             <summary>

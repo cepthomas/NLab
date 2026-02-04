@@ -60,4 +60,59 @@ namespace NLab
     // var otherPerson = person with { Id = 2, FirstName = "Danny" };
 
     public enum ChannelDirection { Output, Input }
+
+
+
+    // //You should create a struct that overrides the implicit conversion operator:
+
+    // struct PackedValue
+    // {
+    //     private ushort _value;
+
+    //     private PackedValue(ushort val)
+    //     {
+    //          if(val >= (1<<12)) throw new ArgumentException("val");
+    //          this._value = val;
+    //     }
+
+    //     public static explicit operator PackedValue(ushort value)
+    //     {
+    //         return new PackedValue(value);
+    //     }
+
+    //     public static implicit operator ushort(PackedValue me)
+    //     {
+    //         return me._value;
+    //     }
+    // }
+
+
+
+    // // Licensed to the .NET Foundation under one or more agreements.
+    // // The .NET Foundation licenses this file to you under the MIT license.
+
+    // using System.Runtime.CompilerServices;
+
+    // namespace System
+    // {
+    //     public partial class Object
+    //     {
+    //         // Returns a Type object which represent this object instance.
+    //         [Intrinsic]
+    //         [MethodImpl(MethodImplOptions.InternalCall)]
+    //         public extern Type GetType();
+
+    //         // Returns a new object instance that is a memberwise copy of this
+    //         // object.  This is always a shallow copy of the instance. The method is protected
+    //         // so that other object may only call this method on themselves.  It is intended to
+    //         // support the ICloneable interface.
+    //         [Intrinsic]
+    //         protected unsafe object MemberwiseClone()
+    //         {
+    //             return clone;
+    //         }
+    //     }
+    // }
+
+
 }

@@ -1,21 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <UseWindowsForms>false</UseWindowsForms>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <!-- <OutputType>WinExe</OutputType> -->
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
+        <NoWarn>1701;1702;CA1816;CA1822;SYSLIB1054</NoWarn>
+    </PropertyGroup>
 
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
-    <!-- <NoWarn>1701;1702;CA1816;CA1822</NoWarn> -->
-  </PropertyGroup>
+    <ItemGroup>
+        <Compile Remove="lib\**" />
+        <EmbeddedResource Remove="lib\**" />
+        <None Remove="lib\**" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Ephemera.NBagOfTricks">
-      <HintPath>lib\Ephemera.NBagOfTricks.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="Patterns.cs" />
+      <Compile Remove="Types.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Patterns.cs" />
+      <Content Include="Types.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Ephemera.NBagOfTricks">
+            <HintPath>lib\Ephemera.NBagOfTricks.dll</HintPath>
+        </Reference>
+        <Reference Include="Ephemera.NBagOfUis">
+            <HintPath>lib\Ephemera.NBagOfUis.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
 </Project>

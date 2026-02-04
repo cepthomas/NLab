@@ -21,7 +21,7 @@ namespace Test
 
     /// <summary>Script flavor of stream.</summary>
     /// <see cref="Stream"/>
-    public class MockStream : Stream // TODO not used now?
+    public class MockStream : Stream
     {
         /// <summary>Throw this exception on next call.</summary>
         public Exception? ThrowMe { get; set; } = null;

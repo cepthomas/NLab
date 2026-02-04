@@ -10,7 +10,7 @@ namespace ClassHierarchy
 {
     public abstract class Element
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = "???";
 
         public int Row { get; set; }
 
@@ -21,29 +21,29 @@ namespace ClassHierarchy
 
     public class ChartSeries
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = "???";
 
         public Color Color { get; set; }
 
-        public string YRange { get; set; }
+        public string YRange { get; set; } = "???";
 
-        public string XRange { get; set; }
+        public string XRange { get; set; } = "???";
     }
 
     public class Chart : Element
     {
         public List<ChartSeries> DataSeries { get; set; } = [];
 
-        public string TitleText { get; set; }
+        public string TitleText { get; set; } = "???";
 
-        public string XAxisLabelText { get; set; }
+        public string XAxisLabelText { get; set; } = "???";
 
-        public string YAxisLabelText { get; set; }
+        public string YAxisLabelText { get; set; } = "???";
     }
 
     public class Table : Element
     {
-        public DataTable RawTable { get; set; }
+        public DataTable RawTable { get; set; } = new();
 
         public bool IncludeHeader { get; set; } = true;
 
@@ -61,13 +61,13 @@ namespace ClassHierarchy
 
     public class Page
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = "???";
 
-        public string Header { get; set; }
+        public string Header { get; set; } = "???";
 
-        public List<Table> Tables { get; set; }
+        public List<Table> Tables { get; set; } = [];
 
-        public List<Chart> Charts { get; set; }
+        public List<Chart> Charts { get; set; } = [];
     }
 
 
@@ -92,12 +92,12 @@ namespace ClassHierarchy
     {
         public AnimalFamily Family;
 
-        public string Name;
+        public string Name = "???";
 
-        public Color Shade;
+        public Color Shade = Color.White;
 
-        public string Range;
+        public string Range = "???";
 
-        public List<Animal> Eats;
+        public List<Animal> Eats = [];
     }
 }
