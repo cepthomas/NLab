@@ -11,14 +11,370 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Reflection;
 using static NLab.Utils;
-
-
-// lots from - https://markheath.net/post/starting-threads-in-dotnet
 
 
 namespace NLab
 {
+    /// <summary>TODO Experimental class to log enter/exit scope.</summary>
+    public class Scoper : IDisposable
+    {
+        readonly string _func;
+        //static readonly List<string> _captures = [];
+        readonly int _tid;
+        private bool disposedValue;
+
+        //public static List<string> Captures { get { return _captures; } }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public Scoper()
+        {
+            //// Get the caller-caller function info.
+            //var sf1 = new StackFrame(1);
+            //_func = sf1.GetMethod().Name;
+            //var line = sf1.GetFileLineNumber();
+
+            //var sf2 = new StackFrame(2);
+            //_func = sf2.GetMethod().Name;
+            //var line2 = sf2.GetFileLineNumber();
+
+            //_func = callerMember;
+            //var line = callerLine;
+
+            // Get thread id.
+            _tid = Environment.CurrentManagedThreadId;
+
+            Tell(DBG, $"Scoper constructor T:{_tid}", 2);
+            //_captures.Add($"{_func}<{_tid}>: Scoper constructor");
+        }
+
+
+        //[MethodImpl(MethodImplOptions.NoInlining)]
+        //public Scoper(
+        //    [CallerFilePath] string callerFile = "",
+        //    [CallerLineNumber] int callerLine = -1,
+        //    [CallerMemberName] string callerMember = "???"
+        //    )
+        //{
+        //    //// Get the caller-caller function info.
+        //    //var sf1 = new StackFrame(1);
+        //    //_func = sf1.GetMethod().Name;
+        //    //var line = sf1.GetFileLineNumber();
+
+        //    //var sf2 = new StackFrame(2);
+        //    //_func = sf2.GetMethod().Name;
+        //    //var line2 = sf2.GetFileLineNumber();
+
+        //    _func = callerMember;
+        //    var line = callerLine;
+
+        //    // Get thread id.
+        //    _tid = Environment.CurrentManagedThreadId;
+
+        //    Tell(DBG, $"Scoper constructor F:{_func}({line}) T:{_tid}", 2);
+        //    //_captures.Add($"{_func}<{_tid}>: Scoper constructor");
+        //}
+
+
+
+        ~Scoper()
+        {
+            Tell(DBG, $"Scoper destructor {_func} T!{_tid}", 1);
+            //Tell(DBG, $"Scoper destructor {_func}({line}) T!{_tid}");
+            //_captures.Add($"{_func}<{_tid}>: Scoper destructor");
+        }
+
+        public void Dispose()
+        {
+            Tell(DBG, $"Scoper dispose {_func} T{_tid}", 1);
+            //Tell(DBG, $"Scoper dispose {_func}({line}) T{_tid}");
+            //_captures.Add($"{_func}<{_tid}>: Scoper dispose");
+        }
+
+
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+        public bool TLOG_EQUAL<T>(T value1, T value2) where T : IComparable//,
+            //[CallerFilePath] string file = "UNKNOWN_FILE",
+            //[CallerLineNumber] int line = -1) where T : IComparable
+        {
+            bool pass = true;
+            if (value1.CompareTo(value2) != 0)
+            {
+                //var fn = Path.GetFileName(file);
+                //Tell(ERR, $"{fn} {line} [{value1}] should be [{value2}]", 2);
+                Tell(ERR, $"[{value1}] should be [{value2}]", 2);
+                pass = false;
+            }
+            //else
+            //{
+            //    RecordResult(true, $"", file, line);
+            //}
+            return pass;
+        }
+
+        // _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text, p1, p2);
+        // #define TLOG_INFO_2(text, p1, p2) _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text, p1, p2);
+        // #define TLOG_DETAIL_2(text, p1, p2) _logger.Trace(CMN_CTraceLogger::mkDetail, __LINE__, text, p1, p2);
+        public void TLOG_INFO(string text)//,
+            //[CallerFilePath] string file = "UNKNOWN_FILE",
+            //[CallerLineNumber] int line = -1)
+        {
+            //var fn = Path.GetFileName(file);
+            //Tell(INF, $"{fn} {line} [{text}]", 2);
+            Tell(INF, $"{text}", 2);
+        }
+    }
+
+    public static class TRACER
+    {
+        public delegate void Writer(string s);
+
+        static Writer _writer; // = writer;
+
+        // Do once in module:
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void TLOG_INIT(Writer writer) 
+        {
+            _writer = writer;
+        }
+
+
+        // At function entry:
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void TLOG_CONTEXT()
+        {
+            //// Get the function name
+            //var sf1 = new StackFrame(1);
+            //var mname = sf1.GetMethod().Name;
+            //var scoper = new Scoper(mname);
+
+            using var scoper = new Scoper();
+
+            // Get thread id
+            int tid = Thread.GetCurrentProcessorId();
+        }
+
+
+        public static bool TLOG_EQUAL<T>(T value1, T value2,
+            [CallerFilePath] string file = "UNKNOWN_FILE",
+            [CallerLineNumber] int line = -1) where T : IComparable
+        {
+            bool pass = true;
+            if (value1.CompareTo(value2) != 0)
+            {
+                Tell(ERR, $"[{value1}] should be [{value2}]", 2);
+                pass = false;
+            }
+            //else
+            //{
+            //    RecordResult(true, $"", file, line);
+            //}
+            return pass;
+        }
+
+
+        // _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text, p1, p2);
+        // #define TLOG_INFO_2(text, p1, p2) _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text, p1, p2);
+        // #define TLOG_DETAIL_2(text, p1, p2) _logger.Trace(CMN_CTraceLogger::mkDetail, __LINE__, text, p1, p2);
+        public static void TLOG_INFO(string text) //, params object[] vars)
+        {
+            Tell(INF, $"TLOG_INFO: [{text}]", 2);
+        }
+
+
+
+        /////////////////////////// old ////////////////////////////////////////////
+
+
+        //// At function entry:
+        //[MethodImpl(MethodImplOptions.NoInlining)]
+        //public static void TLOG_CONTEXT_1(Func<object, object, bool> test) // object rs)
+        //{
+        //    // func is function name - from???
+        //    // rs is return value for testing
+
+        //    //Action<bool> test
+
+        //    var sf1 = new StackFrame(1);
+        //    var mname = sf1.GetMethod().Name;
+
+        //    //MethodBase method = frame.GetMethod();
+        //    //MethodBody body = method.GetMethodBody();
+        //    //Console.WriteLine("Method: {0}", method.Name);
+        //}
+
+
+
+
+        //[MethodImpl(MethodImplOptions.NoInlining)]
+        //public static void TLOG_CONTEXT(string func, object rs)
+        //{
+        //    // func is function name
+        //    // rs is return value for testing
+        //}
+
+
+        // CMN_CTraceLogger _logger(#func, &rs);
+        // /// Macro for declaring a context logger. Tests exit condition of RET_STAT and record failure.
+        // #define TLOG_CONTEXT(func, rs) CMN_CTraceLogger _logger(#func, &rs);
+        // /// Macro for declaring a context logger with timing information.
+        // #define TLOG_CONTEXT_T(func, rs) CMN_CTraceLogger _logger(#func, &rs, CMN_TRUE);
+        // /// Macro for declaring a simple context logger with no RET_STAT checking.
+        // #define TLOG_CONTEXT_S(func) CMN_CTraceLogger _logger(#func);
+
+
+
+        // Usage:
+        // RET_STAT    RetStat = RET_STAT_NO_ERR;
+        // TLOG_CONTEXT(CAssayData::UpdateSampleProgram, RetStat);
+        // TLOG_INFO_1("No reprocessing should occur for Result %ld", this->xDbResRec.lResultID)
+        // TLOG_INFO_3("CResultsData::UpdateSampleProgram: PROGRAM Adding reflex test %ld from Result %ld, Deferred:%hd",
+        //                 pcNextTest->lAssayNumber,
+        //                 this->xDbResRec.lResultID,
+        //                 pcNextTest->bDeferred);
+        // TLOG_DETAIL_1("%s", Sample.GetString()); 
+
+
+
+        ///////////// Support macros to make logging easy. ///////////////
+        // /// Macro to init static members. Use this once only in your module.
+        // #define TLOG_INIT() \
+        // CMN_CHAR CMN_CTraceLogger::mzTraceFlags[] = { 0 }; \
+        // CMN_BOOL CMN_CTraceLogger::mbStdout = CMN_TRUE; \
+        // CMN_BOOL CMN_CTraceLogger::mbTimingEnable = CMN_FALSE; \
+        // CMN_BOOL CMN_CTraceLogger::mbFuncEnable = CMN_FALSE; \
+        // CMN_CHAR CMN_CTraceLogger::mkErr = '*'; \
+        // CMN_CHAR CMN_CTraceLogger::mkInfo = '-'; \
+        // CMN_CHAR CMN_CTraceLogger::mkDetail = '~'; \
+        // const CMN_CHAR* (*CMN_CTraceLogger::mRetStatFunc)(RET_STAT RetStat) = 0;
+
+        // /// Macro for declaring a context logger. Tests exit condition of RET_STAT and record failure.
+        // #define TLOG_CONTEXT(func, rs) CMN_CTraceLogger _logger(#func, &rs);
+        // /// Macro for declaring a context logger with timing information.
+        // #define TLOG_CONTEXT_T(func, rs) CMN_CTraceLogger _logger(#func, &rs, CMN_TRUE);
+        // /// Macro for declaring a simple context logger with no RET_STAT checking.
+        // #define TLOG_CONTEXT_S(func) CMN_CTraceLogger _logger(#func);
+
+        // /// Macros for capturing general information.
+        // #define TLOG_INFO_0(text) _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text);
+        // #define TLOG_INFO_1(text, p1) _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text, p1);
+        // #define TLOG_INFO_2(text, p1, p2) _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text, p1, p2);
+        // #define TLOG_INFO_3(text, p1, p2, p3) _logger.Trace(CMN_CTraceLogger::mkInfo, __LINE__, text, p1, p2, p3);
+
+        // #define TLOG_DETAIL_0(text) _logger.Trace(CMN_CTraceLogger::mkDetail, __LINE__, text);
+        // #define TLOG_DETAIL_1(text, p1) _logger.Trace(CMN_CTraceLogger::mkDetail, __LINE__, text, p1);
+        // #define TLOG_DETAIL_2(text, p1, p2) _logger.Trace(CMN_CTraceLogger::mkDetail, __LINE__, text, p1, p2);
+        // #define TLOG_DETAIL_3(text, p1, p2, p3) _logger.Trace(CMN_CTraceLogger::mkDetail, __LINE__, text, p1, p2, p3);
+
+
+    }
+
+
+    ///// <summary>OLD Experimental class to log enter/exit scope.</summary>
+    //public class Scoper : IDisposable
+    //{
+    //    readonly string _func;
+    //    static readonly List<string> _captures = [];
+
+    //    public static List<string> Captures { get { return _captures; } }
+
+    //    [MethodImpl(MethodImplOptions.NoInlining)]
+    //    public Scoper(string func = "???")
+    //    {
+    //        _func = func;
+    //        _captures.Add($"{_func}: Scoper constructor");
+
+    //        //var sf1 = new StackFrame(1);
+    //        //var sf2 = new StackFrame(2);
+
+    //        //var cm = sf1.GetMethod();
+    //        //var scm = cm.ToString();
+
+    //        //var st = new StackTrace(sf1);
+    //        //var frm = st.GetFrame(0);
+    //        //var sfrm = frm.ToString();
+    //        //var cm = frm.GetMethod();
+    //        //var scm = cm.ToString();
+    //        //cm.CustomAttributes;
+    //        //cm.Name;
+    //        //cm.ReflectedType;
+
+    //        //DumpStackFrame(sf1);
+
+    //        // System.Diagnostics.attr
+    //    }
+
+    //    void DumpStackFrame(StackFrame frame)
+    //    {
+    //        MethodBase method = frame.GetMethod();
+
+    //        MethodBody body = method.GetMethodBody();
+    //        Console.WriteLine("Method: {0}", method.Name);
+
+    //        var mparams = method.GetParameters();
+    //        foreach (var paramInfo in mparams)
+    //        {
+    //            Console.WriteLine("    Param: {0}", paramInfo.ToString());
+    //        }
+
+    //        foreach (LocalVariableInfo variableInfo in body.LocalVariables)
+    //        {
+    //            Console.WriteLine("    Variable: {0}", variableInfo.ToString());
+
+    //            foreach (PropertyInfo property in variableInfo.LocalType.GetProperties())
+    //            {
+    //                Console.WriteLine("        Property: {0}", property.Name);
+    //            }
+    //        }
+    //    }
+
+    //    void DumpStackFrames()
+    //    {
+    //        StackTrace trace = new StackTrace();
+    //        foreach (StackFrame frame in trace.GetFrames())
+    //        {
+    //            MethodBase method = frame.GetMethod();
+    //            MethodBody body = method.GetMethodBody();
+    //            Console.WriteLine("Method: {0}", method.Name);
+
+    //            foreach (LocalVariableInfo variableInfo in body.LocalVariables)
+    //            {
+    //                Console.WriteLine("\tVariable: {0}", variableInfo.ToString());
+
+    //                foreach (PropertyInfo property in variableInfo.LocalType.GetProperties())
+    //                {
+    //                    Console.WriteLine("\t\tProperty: {0}", property.Name);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    ~Scoper()
+    //    {
+    //        _captures.Add($"{_func}: Scoper destructor");
+    //    }
+
+    //    public void Dispose()
+    //    {
+    //        _captures.Add($"{_func}: Scoper dispose");
+    //    }
+
+    //    //[MethodImpl(MethodImplOptions.NoInlining)]
+    //    //public static MethodBase? GetMyCaller()
+    //    //{
+    //    //    var st = new StackTrace(new StackFrame(1));
+    //    //    var cm = st.GetFrame(0).GetMethod();
+    //    //    return cm;
+    //    //}
+
+    //}
+
+
+
+
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     public sealed class LogMethodExecutionAttribute : Attribute
     {
@@ -30,60 +386,134 @@ namespace NLab
         }
     }
 
-    /// <summary>TODO Experimental class to log enter/exit scope.</summary>
-    //TODO Use attribute? https://medium.com/@nwonahr/creating-and-using-custom-attributes-in-c-for-asp-net-core-c4f7d3db1829
-    public class Scoper : IDisposable
+    //public class LogMethodExecutionFilter : IActionFilter
+    //{
+    //    public void OnActionExecuting(ActionExecutingContext context)
+    //    {
+    //        var method = context.ActionDescriptor.MethodInfo;
+    //        var logAttribute = method.GetCustomAttribute<LogMethodExecutionAttribute>();
+    //        if (logAttribute != null)
+    //        {
+    //            // Your logging logic here
+    //            Console.WriteLine($"Log: {logAttribute.LogMessage}");
+    //        }
+    //    }
+    //    public void OnActionExecuted(ActionExecutedContext context)
+    //    {
+    //        // Post-action logic
+    //    }
+    //}
+
+
+
+
+
+    public class Scoper_orig : IDisposable
     {
-        readonly string _id;
+        readonly string _funcName;
         static readonly List<string> _captures = [];
 
         public static List<string> Captures { get { return _captures; } }
 
-        public Scoper(string id)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public Scoper_orig(string funcName)
         {
-            _id = id;
-            // _captures.Add($"{_id}: Scoper.Scoper(string id)");
-            Console.WriteLine($"Scoper.Scoper({id})");
+            _funcName = funcName;
+            _captures.Add($"{_funcName}: Scoper constructor");
+
+            var sf1 = new StackFrame(1);
+            var sf2 = new StackFrame(2);
+
+            var cm = sf1.GetMethod();
+            var scm = cm.ToString();
+
+            //var st = new StackTrace(sf1);
+            //var frm = st.GetFrame(0);
+            //var sfrm = frm.ToString();
+            //var cm = frm.GetMethod();
+            //var scm = cm.ToString();
+            //cm.CustomAttributes;
+            //cm.Name;
+            //cm.ReflectedType;
+
+            DumpStackFrame(sf1);
+
+            // System.Diagnostics.attr
+        }
+
+        void DumpStackFrame(StackFrame frame)
+        {
+            MethodBase method = frame.GetMethod();
+
+            MethodBody body = method.GetMethodBody();
+            Console.WriteLine("Method: {0}", method.Name);
+
+            var mparams = method.GetParameters();
+            foreach (var paramInfo in mparams)
+            {
+                Console.WriteLine("    Param: {0}", paramInfo.ToString());
+            }
+
+            foreach (LocalVariableInfo variableInfo in body.LocalVariables)
+            {
+                Console.WriteLine("    Variable: {0}", variableInfo.ToString());
+
+                foreach (PropertyInfo property in variableInfo.LocalType.GetProperties())
+                {
+                    Console.WriteLine("        Property: {0}", property.Name);
+                }
+
+            }
+        }
+
+        void DumpStackFrames()
+        {
+            StackTrace trace = new StackTrace();
+            foreach (StackFrame frame in trace.GetFrames())
+            {
+                MethodBase method = frame.GetMethod();
+                MethodBody body = method.GetMethodBody();
+                Console.WriteLine("Method: {0}", method.Name);
+
+
+                foreach (LocalVariableInfo variableInfo in body.LocalVariables)
+                {
+                    Console.WriteLine("\tVariable: {0}", variableInfo.ToString());
+
+                    foreach (PropertyInfo property in variableInfo.LocalType.GetProperties())
+                    {
+                        Console.WriteLine("\t\tProperty: {0}", property.Name);
+                    }
+
+                }
+
+            }
+        }
+
+        ~Scoper_orig()
+        {
+            _captures.Add($"{_funcName}: Scoper destructor");
         }
 
         public void Dispose()
         {
-            // _captures.Add($"{_id}: Scoper.Dispose()");
-            Console.WriteLine($"Scoper.Dispose() [{_id}]");
+            _captures.Add($"{_funcName}: Scoper dispose");
         }
 
-
-        void DoLogMethodApp()
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static MethodBase? GetMyCaller()
         {
-            Tell(NON, "Calling TestMethod() 1");
-
-            RunTestMethod("here we go");
-
-            Tell(NON, "Calling TestMethod() 2");
-
-            RunTestMethod("try again");
-
-            Tell(NON, "Finished TestMethod()");
-
-            //AsyncPlay ap = new();
-            //ap.Notif += (object? sender, NotifEventArgs e) => Tell(INF, e.Message);
-            //ap.Go();
+            var st = new StackTrace(new StackFrame(1));
+            var cm = st.GetFrame(0).GetMethod();
+            return cm;
         }
 
-        [LogMethodExecution("testing 123")]
-        void RunTestMethod(string s)
-        {
-            Tell(NON, $"App.RunTestMethod({s}) entry");
-            using var sc = new Scoper("1-1-1-1");
-            int l = s.Length;
-            Tell(INF, $"string is {l} long");
-            Tell(NON, $"App.RunTestMethod() exit");
-        }
     }
+
 }
 
 
-/*
+/* tracer.py
 import sys
 import os
 import time

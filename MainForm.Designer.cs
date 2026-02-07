@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Ephemera.NBagOfUis;
+
 
 namespace NLab
 {
@@ -32,45 +34,69 @@ namespace NLab
         /// </summary>
         private void InitializeComponent()
         {
-            btnGo1 = new Button();
-            label1 = new Label();
+            BtnAsync = new Button();
+            BtnTasks = new Button();
+            BtnScoper = new Button();
+            tvOutput = new TextViewer();
             SuspendLayout();
             // 
-            // btnGo1
+            // BtnAsync
             // 
-            btnGo1.Location = new Point(26, 12);
-            btnGo1.Name = "btnGo1";
-            btnGo1.Size = new Size(86, 26);
-            btnGo1.TabIndex = 0;
-            btnGo1.Text = "Go 1";
-            btnGo1.UseVisualStyleBackColor = true;
+            BtnAsync.Location = new Point(26, 12);
+            BtnAsync.Name = "BtnAsync";
+            BtnAsync.Size = new Size(86, 26);
+            BtnAsync.TabIndex = 0;
+            BtnAsync.Text = "Async";
+            BtnAsync.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // BtnTasks
             // 
-            label1.AutoSize = true;
-            label1.BorderStyle = BorderStyle.FixedSingle;
-            label1.Location = new Point(205, 8);
-            label1.Name = "label1";
-            label1.Size = new Size(47, 21);
-            label1.TabIndex = 1;
-            label1.Text = "label1";
+            BtnTasks.Location = new Point(157, 12);
+            BtnTasks.Name = "BtnTasks";
+            BtnTasks.Size = new Size(86, 26);
+            BtnTasks.TabIndex = 2;
+            BtnTasks.Text = "Tasks";
+            BtnTasks.UseVisualStyleBackColor = true;
+            // 
+            // BtnScoper
+            // 
+            BtnScoper.Location = new Point(275, 12);
+            BtnScoper.Name = "BtnScoper";
+            BtnScoper.Size = new Size(86, 26);
+            BtnScoper.TabIndex = 3;
+            BtnScoper.Text = "Scoper";
+            BtnScoper.UseVisualStyleBackColor = true;
+            // 
+            // tvOutput
+            // 
+            tvOutput.BorderStyle = BorderStyle.FixedSingle;
+            tvOutput.Location = new Point(12, 61);
+            tvOutput.MaxText = 10000;
+            tvOutput.Name = "tvOutput";
+            tvOutput.Prompt = "";
+            tvOutput.Size = new Size(847, 498);
+            tvOutput.TabIndex = 1;
+            tvOutput.WordWrap = true;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(871, 571);
-            Controls.Add(label1);
-            Controls.Add(btnGo1);
+            Controls.Add(BtnScoper);
+            Controls.Add(BtnTasks);
+            Controls.Add(tvOutput);
+            Controls.Add(BtnAsync);
             Name = "MainForm";
             Text = "Form1";
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
-        private Button btnGo1;
-        private Label label1;
+        private Button BtnAsync;
+        private Button BtnTasks;
+        private TextViewer tvOutput;
+        private Button BtnScoper;
     }
 }

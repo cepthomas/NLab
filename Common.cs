@@ -7,61 +7,110 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-//using Ephemera.NBagOfTricks;
+using Ephemera.NBagOfTricks;
+using Ephemera.NBagOfUis;
 
 
 namespace NLab
 {
     #region Types
-    /// <summary>General categories, mainly for logging.</summary>
-    public enum Cat { None, Error, Info }
+    ///// <summary>General categories, mainly for logging.</summary>
+    //public enum Cat { Error, Info, Debug }
 
-    /// <summary>Comm has something to tell the user.</summary>
-    public class NotifEventArgs(Cat cat, string msg) : EventArgs
-    {
-        public Cat Cat { get; init; } = cat;
-        public string Message { get; init; } = msg;
-    }
+    ///// <summary>Comm has something to tell the user.</summary>
+    //public class NotifEventArgs(Cat cat, string msg) : EventArgs
+    //{
+    //    public Cat Cat { get; init; } = cat;
+    //    public string Message { get; init; } = msg;
+    //}
     #endregion
 
 
     public static class Utils
     {
         public const string ERR = "ERR";
-        public const string WRN = "WRN";
         public const string INF = "INF";
-        public const string NON = "---";
+        public const string DBG = "---";
 
-        static long _startTick = Stopwatch.GetTimestamp();
+        static readonly long _startTick = Stopwatch.GetTimestamp();
+
+        static public TextViewer? Output { get; set; } = null;
 
         /// <summary>Tell me something good.</summary>
         /// <param name="msg">What</param>
-        public static void Tell(string cat, string msg,
-            [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = -1,
-            [CallerMemberName] string member = "???")
+        public static void Tell(string cat, string msg, int depth = 0)
+            //[CallerFilePath] string callerFile = "",
+            //[CallerLineNumber] int callerLine = -1,
+            //[CallerMemberName] string callerMember = "???")
         {
+            // The caller info is usually not useful as the material of interest is known only to the calling function.
+            //var fn = Path.GetFileName(callerFile);
+
+            var fn = "???";
+            var line = -1;
+
+            if (depth > 0)
+            {
+                // Get the caller info.
+                var st = new StackTrace(true);
+                var frm = st.GetFrame(depth);
+
+                if (frm is not null )
+                {
+                    fn = Path.GetFileName(frm.GetFileName());
+                    line = frm.GetFileLineNumber();
+                }
+            }
+
             long tick = Stopwatch.GetTimestamp();
             int tid = Environment.CurrentManagedThreadId;
-            var fn = Path.GetFileName(file);
-            double sec = 1.0 * (tick - _startTick) / Stopwatch.Frequency;
-            //double msec = 1000.0 * (tick - _startTick) / Stopwatch.Frequency;
+            double msec = Msec();
+            double sec = msec / 1000.0;
 
-            var s = $"{sec:000.000}({tid}) {cat} {fn}({line}) <{member}> {msg}";
+            //var s = $"{sec:000.000} {tid} {cat} {fn}({line}) <{member}> {msg}";
+            //var s = $"{(int)msec:0000.000} T{tid} {cat} {fn}({callerLine}) {callerMember} [{msg}]";
+            var s = $"{(int)msec:0000.000} T:{tid} {cat} {fn}({line}) [{msg}]";
+            //var s = $"{(int)msec:0000.000} T{tid} {cat} [{msg}]";
 
-            Console.ForegroundColor = cat switch
+            if (Output is not null)
             {
-                ERR => ConsoleColor.Red,
-                INF => ConsoleColor.Cyan,
-                _ => ConsoleColor.White
-            };
+                Output.AppendMatch(s);
+            }
+            else
+            {
+                Console.ForegroundColor = cat switch
+                {
+                    ERR => ConsoleColor.Red,
+                    DBG => ConsoleColor.Cyan,
+                    _ => ConsoleColor.White
+                };
 
-            Console.WriteLine(s);
-            Console.ResetColor();
-
-            //Log(cat, s);
-            //txtViewer.AppendLine(s);
+                Console.WriteLine(s);
+                Console.ResetColor();
+            }
         }
 
+        /// <summary>
+        /// Get current msec.
+        /// </summary>
+        /// <returns></returns>
+        static int Msec()//long tick)
+        {
+            return (int)(1000 * (Stopwatch.GetTimestamp() - _startTick) / Stopwatch.Frequency);
+        }
+
+        /// <summary>
+        /// Simulate synchronous real-world/time work.
+        /// </summary>
+        /// <param name="msec"></param>
+        public static void SyncTimeEater(int msec)
+        {
+            var start = Msec();
+
+            while (Msec() < start + msec)
+            {
+                // This is a bad idea except for very short delays.
+            }
+        }
     }
 }
