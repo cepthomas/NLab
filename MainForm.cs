@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,39 +25,39 @@ namespace NLab
         {
             InitializeComponent();
 
+            Move += (sender, e) => { Text = $"L:{Left} T:{Top} W:{Width} H:{Height}"; };
+
             BtnAsync.Click += AsyncClick;
             BtnTasks.Click += TasksClick;
-            BtnScoper.Click += ScoperClick;
-
-            // Init output.
-            Dictionary<string, Color> colors = new()
-            {
-                { "ERR", Color.Red },
-                { "DBG", Color.Cyan }
-            };
-            tvOutput.MatchText = colors;
-            Output = tvOutput;
+            BtnTracer.Click += TracerClick;
         }
 
         async void AsyncClick(object? sender, EventArgs e)
         {
-            await DoAsync();
+            Reset();
+            var x = new AsyncAwait();
+            var res = await x.Go();
         }
 
         void TasksClick(object? sender, EventArgs e)
         {
-            DoTasks();
+            Reset();
+            var x = new TaskWithoutAsync();
+            x.Go();
         }
 
-        void ScoperClick(object? sender, EventArgs e)
+        void TracerClick(object? sender, EventArgs e)
         {
-            DoScoperTest(12.34, new(50, 60, 70, 80));
+            Reset();
+            var x = new Instrumented();
+            //x.Go(12.34, new(50, 60, 70, 80));
+            x.PlayWithAttribute();
         }
+    }
 
-
-        #region ================== async/await =====================
-
-        async Task DoAsync()
+    class AsyncAwait
+    {
+        public async Task<int> Go()
         {
             string state = "Async_Await";
 
@@ -78,6 +79,8 @@ namespace NLab
             await Task.Run(() => xdoc.Load("http://feeds.feedburner.com/soundcode"));
 
             Tell(INF, $"exit [{xdoc.ChildNodes[1].InnerText.Left(32)}]");
+
+            return 909;
         }
 
         // A long-running operation that returns an int.
@@ -113,17 +116,15 @@ namespace NLab
 
             Tell(INF, $"exit [{myOutput}]");
         }
-        #endregion
+    }
 
-
-        #region ================== Tasks no async/await =====================
-
-        // You're looking for Task.WhenAll. Create a bunch of Tasks that do what you want them to,
-        // then wait on all of the tasks and ContinueWith your callback. I split out an async version of
-        // the DoWork method - if you're always going to be calling it asynchronously you don't necessarily need to do that.
-
-        void DoTasks()
+    class TaskWithoutAsync
+    {
+        public void Go()
         {
+            // You're looking for Task.WhenAll. Create a bunch of Tasks that do what you want them to,
+            // then wait on all of the tasks and ContinueWith your callback. I split out an async version of
+            // the DoWork method - if you're always going to be calling it asynchronously you don't necessarily need to do that.
             void Callback()
             {
                 Tell(INF, "Callback()");
@@ -146,53 +147,58 @@ namespace NLab
             // ts.Cancel();
             // Task.WaitAll([taskKeyboard, taskComm]);
         }
-        #endregion
+    }
 
-
-        #region ================== Scoper =====================
-
-        int DoScoperTest(double dval, Rectangle rect)
+    class Instrumented
+    {
+        public int Go(double dval, Rectangle rect)
         {
-            using var sc = new Scoper();
+            using var tr = new Tracer();
 
             // Check args.
-            sc.TLOG_EQUAL(dval, 6.7);
-            sc.TLOG_EQUAL(rect.Height, 999);
+            tr.AssertEqual(dval, 6.7);
+            tr.AssertEqual(rect.Height, 999);
 
             var m1res = TestMethod1("here-we-go", new(10101));
 
             var m2res = TestMethod1("try-again", new(20202));
 
             var res = m2res - m1res;
-            sc.TLOG_ASSERT(res == 543);
+            tr.Assert(res == 543);
 
-            sc.TLOG_ASSERT(m1res < m2res);
+            tr.Assert(m1res < m2res);
 
-            sc.TLOG_INFO($">>> Leaving");
+            tr.Info($">>> Leaving");
 
             return res;
         }
 
-
-        //TODO1 Use attribute? https://medium.com/@nwonahr/creating-and-using-custom-attributes-in-c-for-asp-net-core-c4f7d3db1829
-        [LogMethodExecution("testing level 1")]
-        int TestMethod1(string s, Worker w)
+        // TODO1 Use attribute?
+        [TracerMethod("Tracer testing level 1", 707)]
+        public int TestMethod1(string s, Worker w)
         {
-            using var sc = new Scoper();
+            using var tr = new Tracer();
 
-            sc.TLOG_INFO($"entry s:{s} w:{w.Name}");
+            tr.Info($"entry s:{s} w:{w.Name}");
 
             // do something
             s = new string(s.Reverse().ToArray());
 
-            sc.TLOG_INFO($"exit s:{s}");
+            tr.Info($"exit s:{s}");
 
             return s.Length;
         }
-        #endregion
+
+        public void PlayWithAttribute()
+        {
+            var info = typeof(Instrumented).GetMember("TestMethod1");
+            var attr = info[0].GetCustomAttribute<TracerMethodAttribute>();
+            Tell(INF, $"{attr.Num}:{attr.Message}", 2);
+        }
     }
 
-    public class Worker(int id)
+    // class for test
+    class Worker(int id)
     {
         public string Name { get { return $"Worker{_id}"; } }
 
@@ -215,9 +221,7 @@ namespace NLab
         }
     }
 
-    #region ================== Various socket async TODO1 =====================
-
-    class AsyncSocket
+    class AsyncSocket // TODO
     {
         //  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
         const int packet_length = 2;  // user defined packet length
@@ -282,5 +286,4 @@ namespace NLab
             }
         }
     }
-    #endregion
 }

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <!-- WinExe=form only Exe=form plus console -->
-        <OutputType>WinExe</OutputType>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net8.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>

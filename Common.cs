@@ -13,36 +13,20 @@ using Ephemera.NBagOfUis;
 
 namespace NLab
 {
-    #region Types
-    ///// <summary>General categories, mainly for logging.</summary>
-    //public enum Cat { Error, Info, Debug }
-
-    ///// <summary>Comm has something to tell the user.</summary>
-    //public class NotifEventArgs(Cat cat, string msg) : EventArgs
-    //{
-    //    public Cat Cat { get; init; } = cat;
-    //    public string Message { get; init; } = msg;
-    //}
-    #endregion
-
-
     public static class Utils
     {
         public const string ERR = "ERR";
         public const string INF = "INF";
         public const string DBG = "---";
 
-        static readonly long _startTick = Stopwatch.GetTimestamp();
-
-        static public TextViewer? Output { get; set; } = null;
+        static long _startTick = 0;// Stopwatch.GetTimestamp();
 
         /// <summary>Tell me something good.</summary>
+        /// <param name="cat">What</param>
         /// <param name="msg">What</param>
-        public static void Tell(string cat, string msg, int depth = 0)
+        /// <param name="depth">Info stack position</param>
+        public static void Tell(string cat, string msg, int depth = 2) // 2 is usual
         {
-            // The caller info is usually not useful as the material of interest is known only to the calling function.
-            //var fn = Path.GetFileName(callerFile);
-
             var fn = "???";
             var line = -1;
 
@@ -52,7 +36,7 @@ namespace NLab
                 var st = new StackTrace(true);
                 var frm = st.GetFrame(depth);
 
-                if (frm is not null )
+                if (frm is not null)
                 {
                     fn = Path.GetFileName(frm.GetFileName());
                     line = frm.GetFileLineNumber();
@@ -66,45 +50,39 @@ namespace NLab
 
             var s = $"{(int)msec:0000.000} T:{tid} {cat} {fn}({line}) [{msg}]";
 
-            if (Output is not null) //TODO1 fix these
+            Console.ForegroundColor = cat switch
             {
-                Output.AppendMatch(s);
-            }
-            else
-            {
-                Console.ForegroundColor = cat switch
-                {
-                    ERR => ConsoleColor.Red,
-                    DBG => ConsoleColor.Cyan,
-                    _ => ConsoleColor.White
-                };
+                ERR => ConsoleColor.Red,
+                DBG => ConsoleColor.Cyan,
+                _ => ConsoleColor.White
+            };
 
-                Console.WriteLine(s);
-                Console.ResetColor();
-            }
+            Console.WriteLine(s);
+            Console.ResetColor();
+        }
+
+        public static void Reset()
+        {
+            _startTick = Stopwatch.GetTimestamp();
         }
 
         /// <summary>
         /// Get current msec.
         /// </summary>
         /// <returns></returns>
-        static int Msec()
+        public static int Msec()
         {
             return (int)(1000 * (Stopwatch.GetTimestamp() - _startTick) / Stopwatch.Frequency);
         }
 
         /// <summary>
-        /// Simulate synchronous real-world/time work.
+        /// Simulate synchronous real-world/time work. This is a bad idea except for very short delays.
         /// </summary>
         /// <param name="msec"></param>
         public static void SyncTimeEater(int msec)
         {
             var start = Msec();
-
-            while (Msec() < start + msec)
-            {
-                // This is a bad idea except for very short delays.
-            }
+            while (Msec() < start + msec) { }
         }
     }
 }

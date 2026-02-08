@@ -36,7 +36,7 @@ namespace NLab
         {
             BtnAsync = new Button();
             BtnTasks = new Button();
-            BtnScoper = new Button();
+            BtnTracer = new Button();
             tvOutput = new TextViewer();
             SuspendLayout();
             // 
@@ -58,23 +58,24 @@ namespace NLab
             BtnTasks.Text = "Tasks";
             BtnTasks.UseVisualStyleBackColor = true;
             // 
-            // BtnScoper
+            // BtnTracer
             // 
-            BtnScoper.Location = new Point(275, 12);
-            BtnScoper.Name = "BtnScoper";
-            BtnScoper.Size = new Size(86, 26);
-            BtnScoper.TabIndex = 3;
-            BtnScoper.Text = "Scoper";
-            BtnScoper.UseVisualStyleBackColor = true;
+            BtnTracer.Location = new Point(275, 12);
+            BtnTracer.Name = "BtnTracer";
+            BtnTracer.Size = new Size(86, 26);
+            BtnTracer.TabIndex = 3;
+            BtnTracer.Text = "Tracer";
+            BtnTracer.UseVisualStyleBackColor = true;
             // 
             // tvOutput
             // 
+            tvOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tvOutput.BorderStyle = BorderStyle.FixedSingle;
-            tvOutput.Location = new Point(12, 61);
+            tvOutput.Location = new Point(12, 59);
             tvOutput.MaxText = 10000;
             tvOutput.Name = "tvOutput";
             tvOutput.Prompt = "";
-            tvOutput.Size = new Size(847, 498);
+            tvOutput.Size = new Size(688, 120);
             tvOutput.TabIndex = 1;
             tvOutput.WordWrap = true;
             // 
@@ -82,12 +83,14 @@ namespace NLab
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(871, 571);
-            Controls.Add(BtnScoper);
+            ClientSize = new Size(711, 187);
+            Controls.Add(BtnTracer);
             Controls.Add(BtnTasks);
             Controls.Add(tvOutput);
             Controls.Add(BtnAsync);
+            Location = new Point(1000, 100);
             Name = "MainForm";
+            StartPosition = FormStartPosition.Manual;
             Text = "Form1";
             ResumeLayout(false);
         }
@@ -97,6 +100,6 @@ namespace NLab
         private Button BtnAsync;
         private Button BtnTasks;
         private TextViewer tvOutput;
-        private Button BtnScoper;
+        private Button BtnTracer;
     }
 }

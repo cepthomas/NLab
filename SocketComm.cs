@@ -55,7 +55,7 @@ namespace NLab
                     using var server = TcpListener.Create(_port);
                     server.Start();
 
-                    using var client = server.AcceptTcpClient(); // TODO1? AcceptTcpClientAsync(token)
+                    using var client = server.AcceptTcpClient(); // TODO? AcceptTcpClientAsync(token)
                     Console.WriteLine("Client has connected");
                     using var stream = client.GetStream();
 
@@ -277,7 +277,7 @@ namespace NLab
         }
 
         /// <summary>
-        /// Simple first test from cmd line. TODO1 also tcp/udp?
+        /// Simple first test from cmd line. TODO also tcp/udp?
         /// </summary>
         void DoBasicTarget(CancellationTokenSource ts)
         {
@@ -397,5 +397,4 @@ namespace NLab
             return proc;
         }
     }
-
 }
