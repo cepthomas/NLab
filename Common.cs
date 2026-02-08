@@ -39,9 +39,6 @@ namespace NLab
         /// <summary>Tell me something good.</summary>
         /// <param name="msg">What</param>
         public static void Tell(string cat, string msg, int depth = 0)
-            //[CallerFilePath] string callerFile = "",
-            //[CallerLineNumber] int callerLine = -1,
-            //[CallerMemberName] string callerMember = "???")
         {
             // The caller info is usually not useful as the material of interest is known only to the calling function.
             //var fn = Path.GetFileName(callerFile);
@@ -67,12 +64,9 @@ namespace NLab
             double msec = Msec();
             double sec = msec / 1000.0;
 
-            //var s = $"{sec:000.000} {tid} {cat} {fn}({line}) <{member}> {msg}";
-            //var s = $"{(int)msec:0000.000} T{tid} {cat} {fn}({callerLine}) {callerMember} [{msg}]";
             var s = $"{(int)msec:0000.000} T:{tid} {cat} {fn}({line}) [{msg}]";
-            //var s = $"{(int)msec:0000.000} T{tid} {cat} [{msg}]";
 
-            if (Output is not null)
+            if (Output is not null) //TODO1 fix these
             {
                 Output.AppendMatch(s);
             }
@@ -94,7 +88,7 @@ namespace NLab
         /// Get current msec.
         /// </summary>
         /// <returns></returns>
-        static int Msec()//long tick)
+        static int Msec()
         {
             return (int)(1000 * (Stopwatch.GetTimestamp() - _startTick) / Stopwatch.Frequency);
         }
