@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,9 @@ using System.Xml;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
 using static NLab.Utils;
+
+
+// https://markheath.net/post/starting-threads-in-dotnet
 
 
 namespace NLab
@@ -30,6 +34,7 @@ namespace NLab
             BtnAsync.Click += AsyncClick;
             BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
+            BtnStuff.Click += StuffClick;
         }
 
         async void AsyncClick(object? sender, EventArgs e)
@@ -49,10 +54,21 @@ namespace NLab
         void TracerClick(object? sender, EventArgs e)
         {
             Reset();
-            var x = new Instrumented();
-            //x.Go(12.34, new(50, 60, 70, 80));
+            var x = new TracerPlay();
+            x.Go(12.34, new(50, 60, 70, 80));
             x.PlayWithAttribute();
         }
+
+        void StuffClick(object? sender, EventArgs e)
+        {
+            Reset();
+            var x = new Stuff();
+        }
+    }
+
+    class Stuff
+    {
+
     }
 
     class AsyncAwait
@@ -122,13 +138,7 @@ namespace NLab
     {
         public void Go()
         {
-            // You're looking for Task.WhenAll. Create a bunch of Tasks that do what you want them to,
-            // then wait on all of the tasks and ContinueWith your callback. I split out an async version of
-            // the DoWork method - if you're always going to be calling it asynchronously you don't necessarily need to do that.
-            void Callback()
-            {
-                Tell(INF, "Callback()");
-            }
+            void Callback() { Tell(INF, "Callback()"); }
 
             int id = 1;
             List<Worker> workers = [new(id++), new(id++), new(id++)];
@@ -139,7 +149,7 @@ namespace NLab
 
             Tell(INF, "Waiting");
 
-            // TODO1 stuff like this:
+            // TODO stuff like this:
             // using CancellationTokenSource ts = new();
             // using Task taskKeyboard = Task.Run(() => DoKeyboard(ts.Token));
             // using Task taskComm = Task.Run(() => _comm.Run(ts.Token));
@@ -149,31 +159,37 @@ namespace NLab
         }
     }
 
-    class Instrumented
+    class TracerPlay
     {
         public int Go(double dval, Rectangle rect)
         {
             using var tr = new Tracer();
 
             // Check args.
-            tr.AssertEqual(dval, 6.7);
-            tr.AssertEqual(rect.Height, 999);
+            tr.Assert(dval == 6.7); // false - fail
+            tr.Assert(rect.Height == 999); // false - fail
 
             var m1res = TestMethod1("here-we-go", new(10101));
 
             var m2res = TestMethod1("try-again", new(20202));
 
             var res = m2res - m1res;
-            tr.Assert(res == 543);
+            tr.Assert(res == 543); // false - fail
 
-            tr.Assert(m1res < m2res);
+            tr.Assert(m1res < m2res); // false - fail
+
+            tr.Info($"more asserts");
+            List<int>? ls = [23, 4, 695, 81, -34, 10000];
+            tr.Assert(ls == null); // false - fail
+            tr.Assert(ls != null); // true - pass
+            tr.Assert(ls[1] == 4, ls[1]); // true - pass
+            tr.Assert(ls[2] == 696, ls[2]); // false - fail
 
             tr.Info($">>> Leaving");
 
             return res;
         }
 
-        // TODO1 Use attribute?
         [TracerMethod("Tracer testing level 1", 707)]
         public int TestMethod1(string s, Worker w)
         {
@@ -191,13 +207,55 @@ namespace NLab
 
         public void PlayWithAttribute()
         {
-            var info = typeof(Instrumented).GetMember("TestMethod1");
+            var info = typeof(TracerPlay).GetMember("TestMethod1");
             var attr = info[0].GetCustomAttribute<TracerMethodAttribute>();
             Tell(INF, $"{attr.Num}:{attr.Message}", 2);
         }
     }
 
-    // class for test
+    class DelegateLambda // TODO
+    {
+
+        // Delegates are really just structural typing for functions. You could do the same thing with nominal typing and 
+        // implementing an anonymous class that implements an interface or abstract class, but that ends up being a lot of 
+        // code when only one function is needed.
+
+        // Lambda comes from the idea of lambda calculus of Alonzo Church in the 1930s. It is an anonymous way of creating 
+        // functions. They become especially useful for composing functions
+
+        // So while some might say lambda is syntactic sugar for delegates, I would says delegates are a bridge for easing 
+        // people into lambdas in c#.
+
+        // One difference is that an anonymous delegate can omit parameters while a lambda must match the exact signature. Given:
+        public delegate string TestDelegate(int i);
+
+        public void Test(TestDelegate d) { }
+
+        // you can call it in the following four ways (note that the second line has an anonymous delegate that does not have any parameters):
+        void Callit()
+        {
+            Test(delegate (int i) { return string.Empty; });
+            Test(delegate { return string.Empty; });
+            Test(i => string.Empty);
+            Test(D);
+        }
+
+        private string D(int i)
+        {
+            return string.Empty;
+        }
+
+        private string D2()
+        {
+            return string.Empty;
+        }
+
+        // // You cannot pass in a lambda expression that has no parameters or a method that has no parameters. These are not allowed:
+        // Test(() => String.Empty); // Not allowed, lambda must match signature
+        // Test(D2); // Not allowed, method must match signature
+    }
+
+    // General purpose target class for tests.
     class Worker(int id)
     {
         public string Name { get { return $"Worker{_id}"; } }
@@ -207,6 +265,7 @@ namespace NLab
         public Task DoWorkAsync(string data)
         {
             Tell(INF, $"enter [{data}]");
+            // Task.Run() runs sync code asynchronously.
             var t = Task.Run(() => DoWork(data));
             Tell(INF, $"exit");
             return t;
@@ -221,7 +280,7 @@ namespace NLab
         }
     }
 
-    class AsyncSocket // TODO
+    class AsyncSocket // TODO dev and migrate to nterm
     {
         //  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
         const int packet_length = 2;  // user defined packet length
@@ -286,4 +345,5 @@ namespace NLab
             }
         }
     }
+
 }

@@ -38,6 +38,7 @@ namespace NLab
             BtnTasks = new Button();
             BtnTracer = new Button();
             tvOutput = new TextViewer();
+            BtnStuff = new Button();
             SuspendLayout();
             // 
             // BtnAsync
@@ -79,11 +80,21 @@ namespace NLab
             tvOutput.TabIndex = 1;
             tvOutput.WordWrap = true;
             // 
+            // BtnStuff
+            // 
+            BtnStuff.Location = new Point(392, 12);
+            BtnStuff.Name = "BtnStuff";
+            BtnStuff.Size = new Size(86, 26);
+            BtnStuff.TabIndex = 4;
+            BtnStuff.Text = "Stuff";
+            BtnStuff.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(711, 187);
+            Controls.Add(BtnStuff);
             Controls.Add(BtnTracer);
             Controls.Add(BtnTasks);
             Controls.Add(tvOutput);
@@ -101,5 +112,6 @@ namespace NLab
         private Button BtnTasks;
         private TextViewer tvOutput;
         private Button BtnTracer;
+        private Button BtnStuff;
     }
 }

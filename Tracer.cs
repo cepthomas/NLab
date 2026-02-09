@@ -42,28 +42,21 @@ namespace NLab
             Tell(DBG, $"Tracer dispose {_id} T{_thread}", 1);
         }
 
+        //void Deconstruct() { }
+
         public void Info(string text)
         {
             Tell(INF, $"{text}", 2);
         }
 
-        public void Assert(bool b)
+        public void Assert(bool condition, [CallerArgumentExpression(nameof(condition))] string expr = "???")
         {
-            if (!b)
-            {
-                Tell(ERR, $"assert failed", 2);
-            }
+            if (!condition) { Tell(ERR, $"{expr}"); }
         }
 
-        public bool AssertEqual<T>(T value1, T value2) where T : IComparable // TODO more flavors like this?
+        public void Assert(bool condition, object actual, [CallerArgumentExpression(nameof(condition))] string expr = "???")
         {
-            bool pass = true;
-            if (value1.CompareTo(value2) != 0)
-            {
-                Tell(ERR, $"[{value1}] should be [{value2}]", 2);
-                pass = false;
-            }
-            return pass;
+            if (!condition) { Tell(ERR, $"{expr} actual:{actual}"); }
         }
     }
 
@@ -73,4 +66,52 @@ namespace NLab
         public string Message { get; } = msg;
         public int Num { get; } = num;
     }
+
+
+    public static class Verify // TODO parts may be useful for tracer.
+    {
+        public static void Argument(bool condition, string message, [CallerArgumentExpression("condition")] string conditionExpression = null)
+        {
+            if (!condition) throw new ArgumentException(message: message, paramName: conditionExpression);
+        }
+
+        public static void InRange(int argument, int low, int high,
+            [CallerArgumentExpression("argument")] string argumentExpression = null,
+            [CallerArgumentExpression("low")] string lowExpression = null,
+            [CallerArgumentExpression("high")] string highExpression = null)
+        {
+            if (argument < low)
+            {
+                throw new ArgumentOutOfRangeException(paramName: argumentExpression, message: $"{argumentExpression} ({argument}) cannot be less than {lowExpression} ({low}).");
+            }
+
+            if (argument > high)
+            {
+                throw new ArgumentOutOfRangeException(paramName: argumentExpression, message: $"{argumentExpression} ({argument}) cannot be greater than {highExpression} ({high}).");
+            }
+        }
+
+        public static void NotNull<T>(T argument, [CallerArgumentExpression("argument")] string argumentExpression = null) where T : class
+        {
+            if (argument == null) throw new ArgumentNullException(paramName: argumentExpression);
+        }
+
+        static T Single<T>(this T[] array)
+        {
+            Verify.NotNull(array); // paramName: "array"
+            Verify.Argument(array.Length == 1, "Array must contain a single element."); // paramName: "array.Length == 1"
+            return array[0];
+        }
+
+        static T ElementAt<T>(this T[] array, int index)
+        {
+            Verify.NotNull(array); // paramName: "array"
+                                   // paramName: "index"
+                                   // message: "index (-1) cannot be less than 0 (0).", or
+                                   //          "index (6) cannot be greater than array.Length - 1 (5)."
+            Verify.InRange(index, 0, array.Length - 1);
+            return array[index];
+        }
+    }
+
 }
