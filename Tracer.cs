@@ -49,14 +49,19 @@ namespace NLab
             Tell(INF, $"{text}", 2);
         }
 
-        public void Assert(bool condition, [CallerArgumentExpression(nameof(condition))] string expr = "???")
+        public void Assert(bool condition, object? actual = null, [CallerArgumentExpression(nameof(condition))] string expr = "???")
         {
-            if (!condition) { Tell(ERR, $"{expr}"); }
-        }
-
-        public void Assert(bool condition, object actual, [CallerArgumentExpression(nameof(condition))] string expr = "???")
-        {
-            if (!condition) { Tell(ERR, $"{expr} actual:{actual}"); }
+            if (!condition)
+            {
+                if (actual is null)
+                {
+                    Tell(ERR, $"{expr}");
+                }
+                else
+                {
+                    Tell(ERR, $"{expr} actual:{actual}");
+                }
+            }
         }
     }
 
