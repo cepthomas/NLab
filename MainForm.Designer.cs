@@ -39,11 +39,13 @@ namespace NLab
             BtnTracer = new Button();
             tvOutput = new TextViewer();
             BtnStuff = new Button();
+            BtnJumplist = new Button();
+            BtnTray = new Button();
             SuspendLayout();
             // 
             // BtnAsync
             // 
-            BtnAsync.Location = new Point(26, 12);
+            BtnAsync.Location = new Point(12, 12);
             BtnAsync.Name = "BtnAsync";
             BtnAsync.Size = new Size(86, 26);
             BtnAsync.TabIndex = 0;
@@ -52,7 +54,7 @@ namespace NLab
             // 
             // BtnTasks
             // 
-            BtnTasks.Location = new Point(157, 12);
+            BtnTasks.Location = new Point(115, 12);
             BtnTasks.Name = "BtnTasks";
             BtnTasks.Size = new Size(86, 26);
             BtnTasks.TabIndex = 2;
@@ -61,7 +63,7 @@ namespace NLab
             // 
             // BtnTracer
             // 
-            BtnTracer.Location = new Point(275, 12);
+            BtnTracer.Location = new Point(222, 12);
             BtnTracer.Name = "BtnTracer";
             BtnTracer.Size = new Size(86, 26);
             BtnTracer.TabIndex = 3;
@@ -82,18 +84,38 @@ namespace NLab
             // 
             // BtnStuff
             // 
-            BtnStuff.Location = new Point(392, 12);
+            BtnStuff.Location = new Point(597, 12);
             BtnStuff.Name = "BtnStuff";
             BtnStuff.Size = new Size(86, 26);
             BtnStuff.TabIndex = 4;
             BtnStuff.Text = "Stuff";
             BtnStuff.UseVisualStyleBackColor = true;
             // 
+            // BtnJumplist
+            // 
+            BtnJumplist.Location = new Point(329, 12);
+            BtnJumplist.Name = "BtnJumplist";
+            BtnJumplist.Size = new Size(86, 26);
+            BtnJumplist.TabIndex = 5;
+            BtnJumplist.Text = "Jumplist";
+            BtnJumplist.UseVisualStyleBackColor = true;
+            // 
+            // BtnTray
+            // 
+            BtnTray.Location = new Point(434, 12);
+            BtnTray.Name = "BtnTray";
+            BtnTray.Size = new Size(86, 26);
+            BtnTray.TabIndex = 6;
+            BtnTray.Text = "Tray";
+            BtnTray.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(711, 187);
+            Controls.Add(BtnTray);
+            Controls.Add(BtnJumplist);
             Controls.Add(BtnStuff);
             Controls.Add(BtnTracer);
             Controls.Add(BtnTasks);
@@ -113,5 +135,7 @@ namespace NLab
         private TextViewer tvOutput;
         private Button BtnTracer;
         private Button BtnStuff;
+        private Button BtnJumplist;
+        private Button BtnTray;
     }
 }

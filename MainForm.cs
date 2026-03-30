@@ -20,15 +20,6 @@ using static NLab.Utils;
 
 // https://markheath.net/post/starting-threads-in-dotnet
 
-
-// TODO:
-//   JumpListEx -> merge with Artificer (rename?)
-//   ClipboardEx -> standalone app?
-//   TrayEx -> NLab
-//   Win32 Internals.cs  WindowManagement.cs  ->    WinBagOfTricks or just loose files in NLab?
-//   TestFiles  -> NLab
-
-
 namespace NLab
 {
     public partial class MainForm : Form
@@ -43,6 +34,7 @@ namespace NLab
             BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
             BtnStuff.Click += StuffClick;
+            //BtnJumplist.Click += (object? sender, EventArgs e) => new JumpListEx();
         }
 
         async void AsyncClick(object? sender, EventArgs e)

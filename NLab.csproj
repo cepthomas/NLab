@@ -8,16 +8,28 @@
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>disable</ImplicitUsings>
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
-        <NoWarn>1701;1702;CA1816;CA1822;SYSLIB1054</NoWarn>
+        <NoWarn>CA1816;CA1822;CS8602;SYSLIB1054</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Remove="JumpListEx\**" />
         <Compile Remove="lib\**" />
+        <Compile Remove="Splunk_WindowMgr\**" />
         <Compile Remove="stuff\**" />
+        <Compile Remove="TrayEx\**" />
+        <Compile Remove="Win32\**" />
+        <EmbeddedResource Remove="JumpListEx\**" />
         <EmbeddedResource Remove="lib\**" />
+        <EmbeddedResource Remove="Splunk_WindowMgr\**" />
         <EmbeddedResource Remove="stuff\**" />
+        <EmbeddedResource Remove="TrayEx\**" />
+        <EmbeddedResource Remove="Win32\**" />
+        <None Remove="JumpListEx\**" />
         <None Remove="lib\**" />
+        <None Remove="Splunk_WindowMgr\**" />
         <None Remove="stuff\**" />
+        <None Remove="TrayEx\**" />
+        <None Remove="Win32\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -31,12 +43,22 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Reference Include="Ephemera.NBagOfTricks">
             <HintPath>lib\Ephemera.NBagOfTricks.dll</HintPath>
         </Reference>
         <Reference Include="Ephemera.NBagOfUis">
             <HintPath>lib\Ephemera.NBagOfUis.dll</HintPath>
         </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="glyphicons-22-snowflake.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

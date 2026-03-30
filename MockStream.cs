@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 //using NTerm;
 
 
-namespace Test
+namespace NLab
 {
     public class CommEventArgs : EventArgs
     {

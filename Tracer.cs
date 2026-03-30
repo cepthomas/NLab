@@ -75,15 +75,16 @@ namespace NLab
 
     public static class Verify // TODO parts may be useful for tracer.
     {
-        public static void Argument(bool condition, string message, [CallerArgumentExpression("condition")] string conditionExpression = null)
+        public static void Argument(bool condition, string message,
+            [CallerArgumentExpression("condition")] string? conditionExpression = null)
         {
             if (!condition) throw new ArgumentException(message: message, paramName: conditionExpression);
         }
 
         public static void InRange(int argument, int low, int high,
-            [CallerArgumentExpression("argument")] string argumentExpression = null,
-            [CallerArgumentExpression("low")] string lowExpression = null,
-            [CallerArgumentExpression("high")] string highExpression = null)
+            [CallerArgumentExpression("argument")] string? argumentExpression = null,
+            [CallerArgumentExpression("low")] string? lowExpression = null,
+            [CallerArgumentExpression("high")] string? highExpression = null)
         {
             if (argument < low)
             {
@@ -96,7 +97,9 @@ namespace NLab
             }
         }
 
-        public static void NotNull<T>(T argument, [CallerArgumentExpression("argument")] string argumentExpression = null) where T : class
+        public static void NotNull<T>(T argument,
+            [CallerArgumentExpression("argument")] string? argumentExpression = null)
+            where T : class
         {
             if (argument == null) throw new ArgumentNullException(paramName: argumentExpression);
         }

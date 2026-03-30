@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 
 
-namespace ClassHierarchy
+namespace NLab
 {
     public abstract class Element
     {
