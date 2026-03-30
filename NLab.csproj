@@ -12,34 +12,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="JumpListEx\**" />
         <Compile Remove="lib\**" />
         <Compile Remove="Splunk_WindowMgr\**" />
         <Compile Remove="stuff\**" />
-        <Compile Remove="TrayEx\**" />
-        <Compile Remove="Win32\**" />
-        <EmbeddedResource Remove="JumpListEx\**" />
         <EmbeddedResource Remove="lib\**" />
         <EmbeddedResource Remove="Splunk_WindowMgr\**" />
         <EmbeddedResource Remove="stuff\**" />
-        <EmbeddedResource Remove="TrayEx\**" />
-        <EmbeddedResource Remove="Win32\**" />
-        <None Remove="JumpListEx\**" />
         <None Remove="lib\**" />
         <None Remove="Splunk_WindowMgr\**" />
         <None Remove="stuff\**" />
-        <None Remove="TrayEx\**" />
-        <None Remove="Win32\**" />
     </ItemGroup>
 
     <ItemGroup>
       <Compile Remove="Patterns.cs" />
-      <Compile Remove="Types.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="Patterns.cs" />
-      <Content Include="Types.cs" />
     </ItemGroup>
 
     <ItemGroup>
