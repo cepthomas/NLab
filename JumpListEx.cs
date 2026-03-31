@@ -22,6 +22,9 @@ namespace NLab
         /// <summary>The jumplist.</summary>
         JumpList? _jl;
 
+        /// <summary>Hello.</summary>
+        readonly RichTextBox rtbInfo;
+
         /// <summary>Filter recents.</summary>
         readonly string _filters = "bat cmd config css csv json log md txt xml";
         // bat cmd c cpp h cc config cs csproj css csv cxx dot js json log lua md map neb np py settings txt xaml xml
@@ -38,13 +41,20 @@ namespace NLab
                 MessageBox.Show("Do some configuring then exit");
                 Environment.Exit(0);
             }
-            else
-            {
-                InitializeComponent();
 
-                Load += JumpListEx_Load;
-                Shown += JumpListEx_Shown;
-            }
+            rtbInfo = new RichTextBox
+            {
+                Location = new Point(72, 32),
+                Name = "rtbInfo",
+                Size = new(407, 218),
+                TabIndex = 0,
+                Text = ""
+            };
+            Controls.Add(rtbInfo);
+
+            ClientSize = new(596, 320);
+            Load += JumpListEx_Load;
+            Shown += JumpListEx_Shown;
         }
 
         /// <summary>
@@ -72,6 +82,19 @@ namespace NLab
                 Environment.Exit(1);
             }
         }
+
+        ///// <summary>
+        ///// Clean up any resources being used.
+        ///// </summary>
+        ///// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing && (components != null))
+        //    {
+        //        components.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
         /// <summary>
         /// Apparently you need to create the jumplist afte the window is shown.

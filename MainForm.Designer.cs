@@ -38,7 +38,7 @@ namespace NLab
             BtnTasks = new Button();
             BtnTracer = new Button();
             tvOutput = new TextViewer();
-            BtnStuff = new Button();
+            BtnWinMgr = new Button();
             BtnJumplist = new Button();
             BtnTray = new Button();
             SuspendLayout();
@@ -82,14 +82,14 @@ namespace NLab
             tvOutput.TabIndex = 1;
             tvOutput.WordWrap = true;
             // 
-            // BtnStuff
+            // BtnWinMgr
             // 
-            BtnStuff.Location = new Point(597, 12);
-            BtnStuff.Name = "BtnStuff";
-            BtnStuff.Size = new Size(86, 26);
-            BtnStuff.TabIndex = 4;
-            BtnStuff.Text = "Stuff";
-            BtnStuff.UseVisualStyleBackColor = true;
+            BtnWinMgr.Location = new Point(597, 12);
+            BtnWinMgr.Name = "BtnWinMgr";
+            BtnWinMgr.Size = new Size(86, 26);
+            BtnWinMgr.TabIndex = 4;
+            BtnWinMgr.Text = "WinMgr";
+            BtnWinMgr.UseVisualStyleBackColor = true;
             // 
             // BtnJumplist
             // 
@@ -116,7 +116,7 @@ namespace NLab
             ClientSize = new Size(711, 187);
             Controls.Add(BtnTray);
             Controls.Add(BtnJumplist);
-            Controls.Add(BtnStuff);
+            Controls.Add(BtnWinMgr);
             Controls.Add(BtnTracer);
             Controls.Add(BtnTasks);
             Controls.Add(tvOutput);
@@ -134,7 +134,7 @@ namespace NLab
         private Button BtnTasks;
         private TextViewer tvOutput;
         private Button BtnTracer;
-        private Button BtnStuff;
+        private Button BtnWinMgr;
         private Button BtnJumplist;
         private Button BtnTray;
     }

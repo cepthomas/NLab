@@ -1,17 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Reflection;
 using static NLab.Utils;
 
 
@@ -113,13 +106,9 @@ namespace NLab
 
         static T ElementAt<T>(this T[] array, int index)
         {
-            Verify.NotNull(array); // paramName: "array"
-                                   // paramName: "index"
-                                   // message: "index (-1) cannot be less than 0 (0).", or
-                                   //          "index (6) cannot be greater than array.Length - 1 (5)."
+            Verify.NotNull(array);
             Verify.InRange(index, 0, array.Length - 1);
             return array[index];
         }
     }
-
 }

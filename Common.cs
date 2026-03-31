@@ -13,6 +13,12 @@ using Ephemera.NBagOfUis;
 
 namespace NLab
 {
+    /// <summary>Internal exception.</summary>
+    public class LabException(string msg, bool isError = true) : Exception(msg)
+    {
+        public bool IsError { get; } = isError;
+    }
+
     public static class Utils
     {
         public const string ERR = "ERR";

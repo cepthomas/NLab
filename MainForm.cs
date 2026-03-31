@@ -15,6 +15,8 @@ using System.Windows.Forms;
 using System.Xml;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
+using WI = Win32.Internals;
+using WM = Win32.WindowManagement;
 using static NLab.Utils;
 
 
@@ -24,7 +26,7 @@ namespace NLab
 {
     public partial class MainForm : Form
     {
-        public MainForm()
+        public MainForm(string[] args)
         {
             InitializeComponent();
 
@@ -33,8 +35,9 @@ namespace NLab
             BtnAsync.Click += AsyncClick;
             BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
-            BtnStuff.Click += StuffClick;
-            //BtnJumplist.Click += (object? sender, EventArgs e) => new JumpListEx();
+            BtnWinMgr.Click += WinMgrClick;
+            BtnJumplist.Click += JumplistClick;
+            BtnTray.Click += TrayClick;
         }
 
         async void AsyncClick(object? sender, EventArgs e)
@@ -42,6 +45,7 @@ namespace NLab
             Reset();
             var x = new AsyncAwait();
             var res = await x.Go();
+            Tell(INF, $"res:{res}");
         }
 
         void TasksClick(object? sender, EventArgs e)
@@ -59,16 +63,54 @@ namespace NLab
             x.PlayWithAttribute();
         }
 
-        void StuffClick(object? sender, EventArgs e)
+        void JumplistClick(object? sender, EventArgs e)
         {
             Reset();
-            var x = new Stuff();
+
         }
-    }
 
-    class Stuff
-    {
+        void TrayClick(object? sender, EventArgs e)
+        {
+            Reset();
 
+        }
+
+        void WinMgrClick(object? sender, EventArgs e)
+        {
+            Reset();
+
+            var fgHandle = WM.ForegroundWindow; // -> left pane
+            WM.AppWindowInfo fginfo = WM.GetAppWindowInfo(fgHandle);
+
+            // New explorer -> right pane.
+            var path = @"C:\Dev\Misc\NLab\TestFiles\";
+            WI.ShellExecute("explore", path);
+
+            // Locate the new explorer window. Wait for it to be created. This is a bit klunky but there does not appear to be a more direct method.
+            int tries = 0; // ~4
+            WM.AppWindowInfo? rightPane = null;
+            for (tries = 0; tries < 20 && rightPane is null; tries++)
+            {
+                Thread.Sleep(50);
+                var wins = WM.GetAppWindows("explorer");
+                rightPane = wins.Where(w => w.Title == path).FirstOrDefault();
+            }
+            if (rightPane is null) throw new LabException($"Couldn't create right pane for [{path}]", true);
+
+            // Relocate/resize the windows to fit available real estate. TODO configurable? full screen?
+            WM.AppWindowInfo desktop = WM.GetAppWindowInfo(WM.ShellWindow);
+            Point loc = new(50, 50);
+            Size sz = new(desktop.DisplayRectangle.Width * 45 / 100, desktop.DisplayRectangle.Height * 80 / 100);
+            // Left pane.
+            WM.MoveWindow(fgHandle, loc);
+            WM.ResizeWindow(fgHandle, sz);
+            WM.ForegroundWindow = fgHandle;
+            // Right pane.
+            loc.Offset(sz.Width, 0);
+            WM.MoveWindow(rightPane.Handle, loc);
+            WM.ResizeWindow(rightPane.Handle, sz);
+            WM.ForegroundWindow = rightPane.Handle;
+        }
     }
 
     class AsyncAwait
@@ -215,7 +257,6 @@ namespace NLab
 
     class DelegateLambda // TODO
     {
-
         // Delegates are really just structural typing for functions. You could do the same thing with nominal typing and 
         // implementing an anonymous class that implements an interface or abstract class, but that ends up being a lot of 
         // code when only one function is needed.
