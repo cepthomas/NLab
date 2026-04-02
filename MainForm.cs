@@ -15,8 +15,7 @@ using System.Windows.Forms;
 using System.Xml;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
-using WI = Win32.Internals;
-using WM = Win32.WindowManagement;
+using static NLab.Win32;
 using static NLab.Utils;
 
 
@@ -79,37 +78,37 @@ namespace NLab
         {
             Reset();
 
-            var fgHandle = WM.ForegroundWindow; // -> left pane
-            WM.AppWindowInfo fginfo = WM.GetAppWindowInfo(fgHandle);
+            var fgHandle = ForegroundWindow; // -> left pane
+            AppWindowInfo fginfo = GetAppWindowInfo(fgHandle);
 
             // New explorer -> right pane.
             var path = @"C:\Dev\Misc\NLab\TestFiles\";
-            WI.ShellExecute("explore", path);
+            ShellExecute("explore", path);
 
             // Locate the new explorer window. Wait for it to be created. This is a bit klunky but there does not appear to be a more direct method.
             int tries = 0; // ~4
-            WM.AppWindowInfo? rightPane = null;
+            AppWindowInfo? rightPane = null;
             for (tries = 0; tries < 20 && rightPane is null; tries++)
             {
                 Thread.Sleep(50);
-                var wins = WM.GetAppWindows("explorer");
+                var wins = GetAppWindows("explorer");
                 rightPane = wins.Where(w => w.Title == path).FirstOrDefault();
             }
             if (rightPane is null) throw new LabException($"Couldn't create right pane for [{path}]", true);
 
             // Relocate/resize the windows to fit available real estate. TODO configurable? full screen?
-            WM.AppWindowInfo desktop = WM.GetAppWindowInfo(WM.ShellWindow);
+            AppWindowInfo desktop = GetAppWindowInfo(ShellWindow);
             Point loc = new(50, 50);
             Size sz = new(desktop.DisplayRectangle.Width * 45 / 100, desktop.DisplayRectangle.Height * 80 / 100);
             // Left pane.
-            WM.MoveWindow(fgHandle, loc);
-            WM.ResizeWindow(fgHandle, sz);
-            WM.ForegroundWindow = fgHandle;
+            MoveWindow(fgHandle, loc);
+            ResizeWindow(fgHandle, sz);
+            ForegroundWindow = fgHandle;
             // Right pane.
             loc.Offset(sz.Width, 0);
-            WM.MoveWindow(rightPane.Handle, loc);
-            WM.ResizeWindow(rightPane.Handle, sz);
-            WM.ForegroundWindow = rightPane.Handle;
+            MoveWindow(rightPane.Handle, loc);
+            ResizeWindow(rightPane.Handle, sz);
+            ForegroundWindow = rightPane.Handle;
         }
     }
 

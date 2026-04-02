@@ -9,7 +9,6 @@ using System.Text;
 using System.Windows.Forms;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
-using W32 = Win32.Internals;
 
 
 namespace NLab

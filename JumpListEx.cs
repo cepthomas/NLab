@@ -11,7 +11,6 @@ using System.Reflection;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using Microsoft.WindowsAPICodePack.Shell;
 using Ephemera.NBagOfTricks;
-using W32 = Win32;
 
 
 namespace NLab
