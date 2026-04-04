@@ -25,6 +25,9 @@ namespace NLab
 {
     public partial class MainForm : Form
     {
+        /// <summary>Hook message processing.</summary>
+        readonly int _hookMsg;
+
         public MainForm(string[] args)
         {
             InitializeComponent();
@@ -37,7 +40,28 @@ namespace NLab
             BtnWinMgr.Click += WinMgrClick;
             BtnJumplist.Click += JumplistClick;
             BtnTray.Click += TrayClick;
+
+            ///// Shell handlers for keys.
+            _hookMsg = W32.RegisterShellHook(Handle);
+            W32.RegisterHotKey(Handle, (int)Keys.Z, W32.MOD_ALT | W32.MOD_CTRL);
+            W32.RegisterHotKey(Handle, (int)Keys.B, W32.MOD_CTRL);
         }
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                //W32.DeregisterShellHook(Handle);
+                //W32.UnregisterHotKeys(Handle);
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
 
         async void AsyncClick(object? sender, EventArgs e)
         {
@@ -65,13 +89,11 @@ namespace NLab
         void JumplistClick(object? sender, EventArgs e)
         {
             Reset();
-
         }
 
         void TrayClick(object? sender, EventArgs e)
         {
             Reset();
-
         }
 
         void WinMgrClick(object? sender, EventArgs e)
@@ -110,6 +132,56 @@ namespace NLab
             ResizeWindow(rightPane.Handle, sz);
             ForegroundWindow = rightPane.Handle;
         }
+
+        #region Windows hooks
+        /// <summary>
+        /// Handle the hooked shell messages: shell window lifetime and hotkeys.
+        /// </summary>
+        /// <param name="message"></param>
+        protected override void WndProc(ref Message message)
+        {
+            IntPtr handle = message.LParam;
+            
+            if (message.Msg == _hookMsg)
+            {
+                var shellEvent = message.WParam.ToInt32();
+
+                switch (shellEvent)
+                {
+                   case W32.HSHELL_WINDOWCREATED:
+                       WM.AppWindowInfo wi = WM.GetAppWindowInfo(handle);
+                       Tell($"WindowCreatedEvent:{handle} {wi.Title}");
+                       break;
+
+                   case W32.HSHELL_WINDOWDESTROYED:
+                       Tell($"WindowDestroyedEvent:{handle}");
+                       break;
+                }
+            }
+
+            if (message.Msg == W32.WM_HOTKEY_MESSAGE_ID) // Decode key.
+            {
+               Keys key = Keys.None;
+               int mod = (int)((long)message.LParam & 0xFFFF);
+               int num = (int)(message.LParam >> 16);
+               if (Enum.IsDefined(typeof(Keys), num))
+               {
+                   key = (Keys)Enum.ToObject(typeof(Keys), num);
+               }
+               // else do something?
+
+               if ((key != Keys.None) && (mod & W32.MOD_ALT) > 0 && (mod & W32.MOD_CTRL) > 0)
+               {
+                   Tell($"Hotkey:{key}");
+                   //switch (key) etc...
+               }
+            }
+
+            base.WndProc(ref message);
+        }
+        #endregion
+
+
     }
 
     class AsyncAwait
