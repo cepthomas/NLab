@@ -15,10 +15,10 @@ using System.Windows.Forms;
 using System.Xml;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
+using W32 = Ephemera.Win32.Internals;
+using WM = Ephemera.Win32.WindowManagement;
 using static NLab.Utils;
 
-
-// https://markheath.net/post/starting-threads-in-dotnet
 
 namespace NLab
 {
@@ -36,7 +36,6 @@ namespace NLab
             BtnAsync.Click += AsyncClick;
             BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
-            BtnWinMgr.Click += WinMgrClick;
             BtnJumplist.Click += JumplistClick;
             BtnTray.Click += TrayClick;
 
@@ -60,7 +59,6 @@ namespace NLab
             }
             base.Dispose(disposing);
         }
-
 
         async void AsyncClick(object? sender, EventArgs e)
         {
@@ -95,43 +93,6 @@ namespace NLab
             Reset();
         }
 
-        void WinMgrClick(object? sender, EventArgs e)
-        {
-            Reset();
-
-            var fgHandle = ForegroundWindow; // -> left pane
-            AppWindowInfo fginfo = GetAppWindowInfo(fgHandle);
-
-            // New explorer -> right pane.
-            var path = @"C:\Dev\Misc\NLab\TestFiles\";
-            ShellExecute("explore", path);
-
-            // Locate the new explorer window. Wait for it to be created. This is a bit klunky but there does not appear to be a more direct method.
-            int tries = 0; // ~4
-            AppWindowInfo? rightPane = null;
-            for (tries = 0; tries < 20 && rightPane is null; tries++)
-            {
-                Thread.Sleep(50);
-                var wins = GetAppWindows("explorer");
-                rightPane = wins.Where(w => w.Title == path).FirstOrDefault();
-            }
-            if (rightPane is null) throw new LabException($"Couldn't create right pane for [{path}]", true);
-
-            // Relocate/resize the windows to fit available real estate. TODO configurable? full screen?
-            AppWindowInfo desktop = GetAppWindowInfo(ShellWindow);
-            Point loc = new(50, 50);
-            Size sz = new(desktop.DisplayRectangle.Width * 45 / 100, desktop.DisplayRectangle.Height * 80 / 100);
-            // Left pane.
-            MoveWindow(fgHandle, loc);
-            ResizeWindow(fgHandle, sz);
-            ForegroundWindow = fgHandle;
-            // Right pane.
-            loc.Offset(sz.Width, 0);
-            MoveWindow(rightPane.Handle, loc);
-            ResizeWindow(rightPane.Handle, sz);
-            ForegroundWindow = rightPane.Handle;
-        }
-
         #region Windows hooks
         /// <summary>
         /// Handle the hooked shell messages: shell window lifetime and hotkeys.
@@ -149,11 +110,11 @@ namespace NLab
                 {
                    case W32.HSHELL_WINDOWCREATED:
                        WM.AppWindowInfo wi = WM.GetAppWindowInfo(handle);
-                       Tell($"WindowCreatedEvent:{handle} {wi.Title}");
+                       tvOutput.AppendLine($"WindowCreatedEvent:{handle} {wi.Title}");
                        break;
 
                    case W32.HSHELL_WINDOWDESTROYED:
-                       Tell($"WindowDestroyedEvent:{handle}");
+                       tvOutput.AppendLine($"WindowDestroyedEvent:{handle}");
                        break;
                 }
             }
@@ -171,7 +132,7 @@ namespace NLab
 
                if ((key != Keys.None) && (mod & W32.MOD_ALT) > 0 && (mod & W32.MOD_CTRL) > 0)
                {
-                   Tell($"Hotkey:{key}");
+                    tvOutput.AppendLine($"Hotkey:{key}");
                    //switch (key) etc...
                }
             }

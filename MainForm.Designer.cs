@@ -25,7 +25,6 @@ namespace NLab
             BtnTasks = new Button();
             BtnTracer = new Button();
             tvOutput = new TextViewer();
-            BtnWinMgr = new Button();
             BtnJumplist = new Button();
             BtnTray = new Button();
             SuspendLayout();
@@ -65,18 +64,9 @@ namespace NLab
             tvOutput.MaxText = 10000;
             tvOutput.Name = "tvOutput";
             tvOutput.Prompt = "";
-            tvOutput.Size = new Size(688, 120);
+            tvOutput.Size = new Size(688, 231);
             tvOutput.TabIndex = 1;
             tvOutput.WordWrap = true;
-            // 
-            // BtnWinMgr
-            // 
-            BtnWinMgr.Location = new Point(597, 12);
-            BtnWinMgr.Name = "BtnWinMgr";
-            BtnWinMgr.Size = new Size(86, 26);
-            BtnWinMgr.TabIndex = 4;
-            BtnWinMgr.Text = "WinMgr";
-            BtnWinMgr.UseVisualStyleBackColor = true;
             // 
             // BtnJumplist
             // 
@@ -100,10 +90,9 @@ namespace NLab
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(711, 187);
+            ClientSize = new Size(711, 298);
             Controls.Add(BtnTray);
             Controls.Add(BtnJumplist);
-            Controls.Add(BtnWinMgr);
             Controls.Add(BtnTracer);
             Controls.Add(BtnTasks);
             Controls.Add(tvOutput);
@@ -121,7 +110,6 @@ namespace NLab
         private Button BtnTasks;
         private TextViewer tvOutput;
         private Button BtnTracer;
-        private Button BtnWinMgr;
         private Button BtnJumplist;
         private Button BtnTray;
     }

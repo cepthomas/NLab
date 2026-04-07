@@ -10,7 +10,13 @@
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
         <NoWarn>CA1816;CA1822;CS8602;SYSLIB1054</NoWarn>
         <OutputPath>bin\</OutputPath>
+        <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="nlab.sublime-project" />
+      <None Remove="nlab.sublime-workspace" />
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
@@ -22,6 +28,9 @@
         </Reference>
         <Reference Include="Ephemera.NBagOfUis">
             <HintPath>lib\Ephemera.NBagOfUis.dll</HintPath>
+        </Reference>
+        <Reference Include="Ephemera.Win32">
+          <HintPath>lib\Ephemera.Win32.dll</HintPath>
         </Reference>
     </ItemGroup>
 
