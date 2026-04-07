@@ -9,6 +9,7 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
         <NoWarn>CA1816;CA1822;CS8602;SYSLIB1054</NoWarn>
+        <OutputPath>bin\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
