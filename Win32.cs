@@ -642,11 +642,4 @@ namespace NLab
         static extern int GetWindowTextLength(IntPtr hwnd);
         #endregion
     }
-
-
-
-
-
-//#endregion
-//}
 }
