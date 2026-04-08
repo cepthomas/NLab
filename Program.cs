@@ -15,13 +15,13 @@ namespace NLab
 
             var cmd = args.Count() == 0 ? "" : args[0];
 
-            Application.Run(new TrayExApplicationContext());
+            Application.Run(new TrayEx());
             return;
 
             switch (cmd)
             {
                 case "j": Application.Run(new JumpListEx()); break;
-                case "t": Application.Run(new TrayExApplicationContext()); break;
+                case "t": Application.Run(new TrayEx()); break;
                 case "":  Application.Run(new MainForm(args)); break;
                 default: throw new LabException($"Baaaad [{cmd}]");
             }

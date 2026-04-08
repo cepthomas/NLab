@@ -16,7 +16,7 @@ using WM = Ephemera.Win32.WindowManagement;
 namespace NLab
 {
     /// <summary>Framework for running application as a tray app.</summary>
-    public class TrayExApplicationContext : ApplicationContext
+    public class TrayEx : ApplicationContext
     {
         #region Fields
         readonly Icon? _icon1;
@@ -29,7 +29,7 @@ namespace NLab
 
         #region Lifecycle
         /// <summary>Start here.</summary>
-        public TrayExApplicationContext()
+        public TrayEx()
         {
             // Clean up resources.
             Application.ApplicationExit += ApplicationExit_Handler;
