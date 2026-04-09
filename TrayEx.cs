@@ -9,13 +9,17 @@ using System.Text;
 using System.Windows.Forms;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
-using W32 = Ephemera.Win32.Internals;
-using WM = Ephemera.Win32.WindowManagement;
+// using W32 = Ephemera.Win32.Internals;
+// using WM  = Ephemera.Win32.WindowManagement;
 
 
 namespace NLab
 {
-    /// <summary>Framework for running application as a tray app.</summary>
+    /// <summary>
+    /// Demonstrates running a form application as a tray app.
+    /// Provides a form for user input.
+    /// Captures hotkeys.
+    /// </summary>
     public class TrayEx : ApplicationContext
     {
         #region Fields
@@ -23,7 +27,6 @@ namespace NLab
         readonly Icon? _icon2;
         readonly Container _components = new();
         readonly NotifyIcon? _notifyIcon;
-        readonly Timer _timer = new();
         TrayExForm? _form = new();
         #endregion
 
@@ -33,10 +36,10 @@ namespace NLab
         {
             // Clean up resources.
             Application.ApplicationExit += ApplicationExit_Handler;
-
             // Or alternatively.
             ThreadExit += ThreadExit_Handler;
 
+            // Context menu.
             ContextMenuStrip ctxm = new();
             ctxm.Items.Add("dialog", null, Menu_Click);
             ctxm.Items.Add("icon", null, Menu_Click);
@@ -44,12 +47,14 @@ namespace NLab
             ctxm.Items.Add("exit", null, Menu_Click);
             ctxm.Opening += ContextMenu_Opening;
 
-            var sf = (Bitmap)Image.FromFile("glyphicons-22-snowflake.png"); // 26x26
+            // Icons.
+            var sf = (Bitmap)Image.FromFile("glyphicons-22-snowflake.png");
             var img1 = sf.Colorize(Color.LightGreen);
-            var img2 = sf.Colorize(Color.Red);
+            var img2 = sf.Colorize(Color.HotPink);
             _icon1 = GraphicsUtils.CreateIcon(img1);
             _icon2 = GraphicsUtils.CreateIcon(img2);
 
+            // Notify icon.
             _notifyIcon = new(_components)
             {
                 Icon = _icon1,
@@ -58,16 +63,10 @@ namespace NLab
                 Visible = true,
                 BalloonTipText = "OK",
             };
-
             _notifyIcon.MouseClick += (sender, e) => { Log($"You clicked icon:{e.Button}"); };
             _notifyIcon.MouseDoubleClick += (sender, e) => { Log($"You double clicked icon:{e.Button}"); }; ;
 
-            // Optional timer.
-            _timer.Tick += new EventHandler(Timer_Tick);
-            _timer.Interval = 1000;
-            _timer.Enabled = true;
-            _timer.Start();
-
+            // UI form.
             _form.StartPosition = FormStartPosition.Manual;
             _form.Location = new Point(1000, 500);
             _form.Show();
@@ -87,7 +86,6 @@ namespace NLab
                 _notifyIcon.Dispose();
                 _icon1.Dispose();
                 _icon2.Dispose();
-                _timer.Dispose();
 
                 _form?.Dispose();
                 _form = null;
@@ -132,7 +130,7 @@ namespace NLab
 
         #region UI Event Handling
         /// <summary>
-        /// Handle context menu.
+        /// Handle context menu before shown.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -140,7 +138,7 @@ namespace NLab
         {
             // Could add more options here.
             var cms = _notifyIcon.ContextMenuStrip;
-            if (cms.Items.Count <5)
+            if (cms.Items.Count < 5)
             {
                 cms.Items.Add(new ToolStripSeparator());
                 cms.Items.Add("extra!", null, Menu_Click);
@@ -176,15 +174,6 @@ namespace NLab
                     ExitThread();
                     break;
             }
-        }
-
-        /// <summary>
-        /// Do something interesting?
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void Timer_Tick(object? sender, EventArgs e)
-        {
         }
         #endregion
 

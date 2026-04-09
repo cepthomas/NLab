@@ -14,16 +14,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="TrayExApplicationContext_1.cs" />
+        <None Remove="nlab.sublime-project" />
+        <None Remove="nlab.sublime-workspace" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="nlab.sublime-project" />
-      <None Remove="nlab.sublime-workspace" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+        <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     </ItemGroup>
 
     <ItemGroup>
@@ -34,14 +30,14 @@
             <HintPath>lib\Ephemera.NBagOfUis.dll</HintPath>
         </Reference>
         <Reference Include="Ephemera.Win32">
-          <HintPath>lib\Ephemera.Win32.dll</HintPath>
+            <HintPath>lib\Ephemera.Win32.dll</HintPath>
         </Reference>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="glyphicons-22-snowflake.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="glyphicons-22-snowflake.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

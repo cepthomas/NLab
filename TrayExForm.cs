@@ -30,8 +30,8 @@ namespace NLab
         {
             int BORDER = 5;
 
-            // This form.
-            Text = "===> TrayExForm <===";
+            // Populate the form.
+            Text = "=== TrayExForm ===";
             Size = new Size(200, 400);
             BackColor = Color.Gold;
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
@@ -57,7 +57,7 @@ namespace NLab
             Controls.Add(rtbInfo);
 
             // Hotkeys.
-            W32.RegisterHotKey(Handle, (int)Keys.A, W32.MOD_ALT | W32.MOD_CTRL);
+            W32.RegisterHotKey(Handle, (int)Keys.A, W32.MOD_CTRL | W32.MOD_ALT);
             W32.RegisterHotKey(Handle, (int)Keys.D9, W32.MOD_CTRL);
         }
 
@@ -72,7 +72,7 @@ namespace NLab
         }
 
         /// <summary>
-        /// Fake closing by hiding the form.
+        /// Close button just hides the form.
         /// </summary>
         /// <param name="e"></param>
         protected override void OnClosing(CancelEventArgs e)
@@ -80,7 +80,8 @@ namespace NLab
             Log($"OnClosing()");
             Visible = false;
             e.Cancel = true;
-            base.OnClosing(e);
+
+            // base.OnClosing(e);
         }
 
         /// <summary>
@@ -90,12 +91,14 @@ namespace NLab
         protected override void Dispose(bool disposing)
         {
             Log($"Dispose({disposing} {_disposed})");
+
             if (disposing)
             {
                 W32.DeregisterShellHook(Handle);
                 W32.UnregisterHotKeys(Handle);
+                _disposed = true;
             }
-            _disposed = true;
+
             base.Dispose(disposing);
         }
 

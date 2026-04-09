@@ -15,9 +15,6 @@ namespace NLab
 
             var cmd = args.Count() == 0 ? "" : args[0];
 
-            Application.Run(new TrayEx());
-            return;
-
             switch (cmd)
             {
                 case "j": Application.Run(new JumpListEx()); break;

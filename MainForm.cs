@@ -140,8 +140,6 @@ namespace NLab
             base.WndProc(ref message);
         }
         #endregion
-
-
     }
 
     class AsyncAwait
