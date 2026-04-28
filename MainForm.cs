@@ -83,16 +83,6 @@ namespace NLab
             x.PlayWithAttribute();
         }
 
-        void JumplistClick(object? sender, EventArgs e)
-        {
-            Reset();
-        }
-
-        void TrayClick(object? sender, EventArgs e)
-        {
-            Reset();
-        }
-
         #region Windows hooks
         /// <summary>
         /// Handle the hooked shell messages: shell window lifetime and hotkeys.
