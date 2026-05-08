@@ -6,7 +6,8 @@
     <members>
         <member name="M:Ephemera.Win32.Internals.SendMessage(System.IntPtr,System.Int32,System.IntPtr,System.IntPtr)">
             <summary>
-            Generic message sender.
+            Generic message sender. Synchronous: waits for the window to process the message
+            Use PostMessage for asynchronous.
             </summary>
             <param name="handle"></param>
             <param name="msg"></param>
@@ -86,6 +87,12 @@
             ? Be careful with the string structure fields: UnmanagedType.LPTStr will be marshalled as unicode string so only
             the first character will be recognized by the function. Use UnmanagedType.LPStr instead.
         </member>
+        <member name="T:Ephemera.Win32.Internals.KBDLLHOOKSTRUCTFlags">
+            <summary>For CallNextHookEx().</summary>
+        </member>
+        <member name="T:Ephemera.Win32.Internals.HookProc">
+            <summary>Defines the callback for the hook. Apparently you can have multiple typed overloads.</summary>
+        </member>
         <member name="M:Ephemera.Win32.Internals.ShellExecute(System.IntPtr,System.String,System.String,System.String,System.String,System.Int32)">
             <summary>Performs an operation on a specified file.
             Args: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-shellexecuteinfoa.
@@ -132,13 +139,20 @@
         </member>
         <member name="P:Ephemera.Win32.WindowManagement.ForegroundWindow">
             <summary>
-            Get or set the fg.
+            Get the fg. As of Win11 no longer able to set it directly.
             </summary>
         </member>
         <member name="P:Ephemera.Win32.WindowManagement.ShellWindow">
             <summary>
             Get the shell window.
             </summary>
+        </member>
+        <member name="M:Ephemera.Win32.WindowManagement.GetTopWindows(System.Boolean)">
+            <summary>
+            Get all top level window handles.
+            </summary>
+            <param name="includeInvisible"></param>
+            <returns></returns>
         </member>
         <member name="M:Ephemera.Win32.WindowManagement.GetAppWindows(System.String,System.Boolean)">
             <summary>

@@ -24,8 +24,12 @@ namespace NLab
 {
     public partial class MainForm : Form
     {
-        /// <summary>Hook message processing.</summary>
-        readonly int _hookMsg;
+        /// <summary>Handle to the LL key hook.</summary>
+        readonly IntPtr _hHook1 = IntPtr.Zero;
+
+        //[TypeConverter(typeof(ExpandableObjectConverter))]
+        public HotKey HotKey { get; set; } = new();
+
 
         public MainForm(string[] args)
         {
@@ -36,11 +40,17 @@ namespace NLab
             BtnAsync.Click += AsyncClick;
             BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
-            BtnJumplist.Click += JumplistClick;
-            BtnTray.Click += TrayClick;
+            //BtnJumplist.Click += JumplistClick;
+            //BtnTray.Click += TrayClick;
+
+            //// LL keyboard hook. from WinClip
+            //using Process process = Process.GetCurrentProcess();
+            //IntPtr hModule = W32.GetModuleHandle(process.MainModule!.ModuleName!);
+            //_hHook2 = W32.SetWindowsHookEx(W32.WH_KEYBOARD_LL, KeyboardHookProc, hModule, 0);
+
 
             ///// Shell handlers for keys.
-            _hookMsg = W32.RegisterShellHook(Handle);
+            _hHook1 = W32.RegisterShellHook(Handle);
             W32.RegisterHotKey(Handle, (int)Keys.Z, W32.MOD_ALT | W32.MOD_CTRL);
             W32.RegisterHotKey(Handle, (int)Keys.B, W32.MOD_CTRL);
         }
@@ -53,12 +63,33 @@ namespace NLab
         {
             if (disposing && (components != null))
             {
-                //W32.DeregisterShellHook(Handle);
-                //W32.UnregisterHotKeys(Handle);
+                W32.DeregisterShellHook(Handle);
+                W32.UnregisterHotKeys(Handle);
+                W32.UnhookWindowsHookEx(_hHook1);
                 components.Dispose();
             }
             base.Dispose(disposing);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void AddHotKey(HotKey hk)
+        {
+            // Listen for hot keys.
+            var key = hk.Key[0] & ~0x20; // make it UC   // high-order word
+            var mod = (hk.Ctrl ? W32.MOD_CTRL : 0) |  // low-order word
+                (hk.Alt ? W32.MOD_ALT : 0) |
+                (hk.Shift ? W32.MOD_SHIFT : 0) |
+                (hk.Win ? W32.MOD_WIN : 0);
+            W32.RegisterHotKey(Handle, key, mod);
+        }
+
+
+
+
+
+
 
         async void AsyncClick(object? sender, EventArgs e)
         {
@@ -92,7 +123,7 @@ namespace NLab
         {
             IntPtr handle = message.LParam;
             
-            if (message.Msg == _hookMsg)
+            if (message.Msg == _hHook1)
             {
                 var shellEvent = message.WParam.ToInt32();
 
@@ -129,8 +160,62 @@ namespace NLab
 
             base.WndProc(ref message);
         }
+
+
+        ///// <summary>
+        ///// Low level keyboard hook function. Other way to implement hotkeys - from WinClip
+        ///// </summary>
+        ///// <param name="code">Virtual-key code in the range 1 to 254. If less than zero, pass the message to the CallNextHookEx function without further processing.</param>
+        ///// <param name="wParam">One of the following messages: WM_KEYDOWN WM_KEYUP WM_SYSKEYDOWN WM_SYSKEYUP.</param>
+        ///// <param name="lParam">Pointer to a KBDLLHOOKSTRUCT structure.</param>
+        ///// <returns>Return value from call to next in chain or >0 for handled locally</returns>
+        //int KeyboardHookProc(int code, int wParam, ref W32.KBDLLHOOKSTRUCT lParam)
+        //{
+        //    bool handled = false;
+        //    if (code >= 0)
+        //    {
+        //        Keys key = (Keys)lParam.vkCode;
+        //        bool keyDown = wParam == W32.WM_KEYDOWN || wParam == W32.WM_SYSKEYDOWN;
+        //        bool keyUp = wParam == W32.WM_KEYUP || wParam == W32.WM_SYSKEYUP;
+        //        bool letterPressed = key == Keys.R && keyDown;
+        //        bool winKey = (key == Keys.LWin || key == Keys.RWin) && keyDown;
+        //        bool ctrlKey = (key & Keys.Control) > 0 && keyDown;
+        //        bool altKey = (key & Keys.Alt) > 0 && keyDown;
+        //    }
+        //    if (handled)
+        //    {
+        //        // If the hook procedure processed the message, it may return a nonzero value to prevent
+        //        // the system from passing the message to the rest of the hook chain or the target window procedure.
+        //        return 1;
+        //    }
+        //    else
+        //    {
+        //        // Pass along chain.
+        //        return W32.CallNextHookEx(_hHook, code, wParam, ref lParam);
+        //    }
+        //}
+
         #endregion
     }
+
+
+
+
+
+
+        public List<string> Dump()
+        {
+            List<string> res = [];
+            _itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
+            return res;
+        } >>>>
+        public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
+        {
+            foreach (var item in s)
+                yield return f(item);
+        }
+
+
 
     class AsyncAwait
     {

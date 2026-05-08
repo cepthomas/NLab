@@ -327,6 +327,194 @@
             </summary>
             <param name="e"></param>
         </member>
+        <member name="T:Ephemera.NBagOfUis.IconicSelector">
+            <summary>Master control.</summary>
+        </member>
+        <member name="T:Ephemera.NBagOfUis.IconicSelector.SelectorStyle">
+            <summary>Supported styles.</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfUis.IconicSelector.SelectorStyle.Tile">
+            <summary>Tile</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfUis.IconicSelector.SelectorStyle.Icon">
+            <summary>Large icon</summary>
+        </member>
+        <member name="T:Ephemera.NBagOfUis.IconicSelector.DrawStyle">
+            <summary>How to draw the entry.</summary>
+        </member>
+        <member name="T:Ephemera.NBagOfUis.IconicSelector.Entry">
+            <summary>API friendly data.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.Entry.Name">
+            <summary>Optional name - not unique</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.Entry.Text">
+            <summary>Displayed text</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.Entry.ImageName">
+            <summary>Id for associated image</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.Entry.Tag">
+            <summary>Optional client use</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.ImageSize">
+            <summary>Image size.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.Style">
+            <summary>Select style.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.MultiSelect">
+            <summary>Allow multiple item selection.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.TileSize">
+            <summary>Tile size -> width.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.AllowExternalDrop">
+            <summary>Allow drag and drop (files) from other applications.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.MarkerColor">
+            <summary>Cosmetics.</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfUis.IconicSelector._lv">
+            <summary>Contained list view.</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfUis.IconicSelector._format">
+            <summary>Text formatting.</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfUis.IconicSelector._defaultImage">
+            <summary>Default image.</summary>
+        </member>
+        <member name="T:Ephemera.NBagOfUis.IconicSelector.SelectionEventArgs">
+            <summary>User made a selection.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.SelectionEventArgs.Entry">
+            <summary>Optional name - not unique</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.SelectionEventArgs.Button">
+            <summary>Which button</summary>
+        </member>
+        <member name="E:Ephemera.NBagOfUis.IconicSelector.Selection">
+            <summary></summary>
+        </member>
+        <member name="T:Ephemera.NBagOfUis.IconicSelector.DroppedTargetEventArgs">
+            <summary>User drag-dropped something from elsewhere.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.DroppedTargetEventArgs.Data">
+            <summary>What was dragged</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.IconicSelector.DroppedTargetEventArgs.Index">
+            <summary>Target location in list</summary>
+        </member>
+        <member name="E:Ephemera.NBagOfUis.IconicSelector.DroppedTarget">
+            <summary></summary>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.#ctor">
+            <summary>
+            Constructor.
+            For some reason ListView doesn't have an OnLoad() event so do everything here.
+            </summary>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Dispose(System.Boolean)">
+            <summary>
+             Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.AddImage(System.String,System.Drawing.Icon)">
+            <summary>
+            Add a named icon to images if not added already. Selector takes ownership of lifetime.
+            </summary>
+            <param name="imgName">Reference name - usually file extension</param>
+            <param name="icon">The icon</param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.AddImage(System.String,System.Drawing.Bitmap)">
+            <summary>
+            Add a named bitmap to images if not added already.
+            </summary>
+            <param name="imgName">Reference name - usually file extension</param>
+            <param name="bmp"></param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.AddNewEntry(System.String,System.String,System.String,System.Object)">
+            <summary>
+            Add a new entry. If insertion mark is visible, insert there, otherwise append.
+            </summary>
+            <param name="name">Optional name</param>
+            <param name="text">For display below/next to image</param>
+            <param name="imgName">Image name</param>
+            <param name="tag">Optional for client use</param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.RemoveSelectedItems">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.GetAllItems">
+            <summary>
+            Get all entry info.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Dump">
+            <summary>
+            Diagnostic.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Lv_DrawItem(System.Object,System.Windows.Forms.DrawListViewItemEventArgs)">
+            <summary>
+            Custom draw the entries. TODO doesn't work as expected - system controls e.Bounds
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Lv_MouseClick(System.Object,System.Windows.Forms.MouseEventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Lv_ItemDrag(System.Object,System.Windows.Forms.ItemDragEventArgs)">
+            <summary>
+            Starts the drag-and-drop operation when an item is dragged.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Lv_DragEnter(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            Sets the target drop effect.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Lv_DragOver(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            Moves the insertion mark as the item is dragged.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Lv_DragLeave(System.Object,System.EventArgs)">
+            <summary>
+            Removes the insertion mark when the mouse leaves the control.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>d
+        </member>
+        <member name="M:Ephemera.NBagOfUis.IconicSelector.Lv_DragDrop(System.Object,System.Windows.Forms.DragEventArgs)">
+            <summary>
+            Moves the item to the location of the insertion mark.
+            Handles drag sources of listview entries and external files.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="T:Ephemera.NBagOfUis.IconicSelector.ListViewIndexComparer">
+            <summary>
+            Sorts ListViewItem objects by index.
+            </summary>
+        </member>
         <member name="T:Ephemera.NBagOfUis.MeterType">
             <summary>Display types.</summary>
         </member>
@@ -845,7 +1033,13 @@
             Make one.
             </summary>
         </member>
-        <member name="P:Ephemera.NBagOfUis.TextViewer.MatchText">
+        <member name="T:Ephemera.NBagOfUis.TextViewer.Matcher">
+            <summary>Spec to identify and colorize line regions.</summary>
+        </member>
+        <member name="M:Ephemera.NBagOfUis.TextViewer.Matcher.#ctor(System.String,System.Nullable{System.Drawing.Color},System.Nullable{System.Drawing.Color})">
+            <summary>Spec to identify and colorize line regions.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.TextViewer.Matchers">
             <summary>The colors to display when text is matched.</summary>
         </member>
         <member name="P:Ephemera.NBagOfUis.TextViewer.BackColor">
@@ -862,6 +1056,9 @@
         </member>
         <member name="P:Ephemera.NBagOfUis.TextViewer.MaxText">
             <summary>Limit the size.</summary>
+        </member>
+        <member name="P:Ephemera.NBagOfUis.TextViewer.MatchUseBackground">
+            <summary>Colorize mathces fore or back.</summary>
         </member>
         <member name="F:Ephemera.NBagOfUis.TextViewer._rtb">
             <summary>Contained control.</summary>
@@ -883,46 +1080,26 @@
             </summary>
             <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         </member>
-        <member name="M:Ephemera.NBagOfUis.TextViewer.AppendLine(System.String,System.Nullable{System.Drawing.Color})">
+        <member name="M:Ephemera.NBagOfUis.TextViewer.Append(System.String,System.Boolean)">
             <summary>
             A message to display to the user. Adds EOL.
             </summary>
             <param name="text">The message.</param>
-            <param name="color">Specific color to use.</param>
-        </member>
-        <member name="M:Ephemera.NBagOfUis.TextViewer.AppendText(System.String,System.Nullable{System.Drawing.Color})">
-            <summary>
-            A message to display to the user. Doesn't add EOL.
-            </summary>
-            <param name="text">The message.</param>
-            <param name="color">Specific color to use.</param>
-        </member>
-        <member name="M:Ephemera.NBagOfUis.TextViewer.AppendColor(System.String,System.Nullable{System.Drawing.Color},System.Nullable{System.Drawing.Color},System.Boolean)">
-            <summary>
-            Output text wwith explicit color.
-            </summary>
-            <param name="text">The text to show.</param>
-            <param name="fg"></param>
-            <param name="bg"></param>
-            <param name="nl">Add new line.</param>
-        </member>
-        <member name="M:Ephemera.NBagOfUis.TextViewer.AppendMatch(System.String,System.Boolean,System.Boolean)">
-            <summary>
-            Output text using text matching color.
-            </summary>
-            <param name="text">The text to show.</param>
-            <param name="line">Color whole line.</param>
-            <param name="nl">Add new line.</param>
+            <param name="nl">Add NL.</param>
         </member>
         <member name="M:Ephemera.NBagOfUis.TextViewer.Clear">
             <summary>
             Clean up.
             </summary>
         </member>
-        <member name="M:Ephemera.NBagOfUis.TextViewer.Write(System.String,System.Boolean)">
+        <member name="M:Ephemera.NBagOfUis.TextViewer.AppendText(System.String,System.Boolean,System.Nullable{System.Drawing.Color},System.Nullable{System.Drawing.Color})">
             <summary>
-            Low level output. Assumes caller has taken care of cross-thread issues.
+            Low level appender with color.
             </summary>
+            <param name="text">The message.</param>
+            <param name="nl">Full line.</param>
+            <param name="fgColor">Specific color to use.</param>
+            <param name="bgColor">Specific color to use.</param>
         </member>
         <member name="M:Ephemera.NBagOfUis.TextViewer.Rtb_KeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
             <summary>

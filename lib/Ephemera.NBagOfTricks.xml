@@ -163,22 +163,6 @@
             <param name="blue"></param>
             <returns></returns>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.ColorUtils.ToSystemColor(System.ConsoleColor)">
-            <summary>Convert ConsoleColor to System.Color.</summary>
-            <param name="conclr">In color</param>
-            <returns>Out color</returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.ColorUtils.ToConsoleColor(System.Drawing.Color)">
-            <summary>Convert System.Color to ConsoleColor.</summary>
-            <param name="sysclr">The color</param>
-            <returns></returns>
-            <exception cref="T:System.Exception"></exception>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.ColorUtils.ToConsoleColor_simple(System.Drawing.Color)">
-            <summary>Simple binning approach.</summary>
-            <param name="sysclr"></param>
-            <returns></returns>
-        </member>
         <member name="M:Ephemera.NBagOfTricks.ColorUtils.GetSequenceColor(System.Int32,System.Boolean)">
             <summary>
             Helper to get next contrast color in the sequence.
@@ -196,20 +180,26 @@
             <param name="two"></param>
             <returns></returns>
         </member>
-        <member name="T:Ephemera.NBagOfTricks.IConsole">
-            <summary>
-            Interface for consoles. Subset of System.Console.
-            </summary>
+        <member name="M:Ephemera.NBagOfTricks.ColorUtils.ToSystemColor(System.ConsoleColor)">
+            <summary>Convert ConsoleColor to System.Color.</summary>
+            <param name="conclr">In color</param>
+            <returns>Out color</returns>
         </member>
-        <member name="T:Ephemera.NBagOfTricks.RealConsole">
-            <summary>
-            The real console. Mainly pass-through for interface members.
-            </summary>
+        <member name="M:Ephemera.NBagOfTricks.ColorUtils.ToConsoleColor(System.Drawing.Color)">
+            <summary>Convert System.Color to ConsoleColor.</summary>
+            <param name="sysclr">The color</param>
+            <returns></returns>
+            <exception cref="T:System.Exception"></exception>
         </member>
-        <member name="T:Ephemera.NBagOfTricks.MockConsole">
-            <summary>
-            A mock Console suitable for testing by simulating input and capturing output.
-            </summary>
+        <member name="M:Ephemera.NBagOfTricks.ColorUtils.ToConsoleColor_simple(System.Drawing.Color)">
+            <summary>Simple binning approach.</summary>
+            <param name="sysclr"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.ColorUtils.ParseNullableConsoleColor(System.String)">
+            <summary>Parse console color safely.</summary>
+            <param name="value">Color name</param>
+            <returns>Console color or null if invalid</returns>
         </member>
         <member name="T:Ephemera.NBagOfTricks.TimeIt">
             <summary>Simple profiler.</summary>
@@ -371,6 +361,11 @@
             <returns></returns>
         </member>
         <member name="M:Ephemera.NBagOfTricks.MathUtils.IsClose(System.Double,System.Double,System.Double)">
+            <summary>
+            Compare two doubles "close enough".
+            </summary>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.MathUtils.IsClose(System.Single,System.Single,System.Single)">
             <summary>
             Compare two doubles "close enough".
             </summary>
@@ -579,6 +574,14 @@
             <param name="action">The action to execute on each element; the second parameter
             of the action represents the index of the source element.</param>
         </member>
+        <member name="M:Ephemera.NBagOfTricks.MiscUtils.RationalizeFileName(System.String,System.String)">
+            <summary>
+            Determines absolute file name.
+            </summary>
+            <param name="fnTest">File name to fix - may have env vars and/or '.\' '..\'</param>
+            <param name="defDir">Default directory - if null use fnTest dir</param>
+            <returns>Fixed file name or null if invalid</returns>
+        </member>
         <member name="T:Ephemera.NBagOfTricks.MmTimerEx">
             <summary>
             The win multimedia timer is erratic. Using a one msec tick (fastest), the measured interval is +-100 us.
@@ -768,6 +771,16 @@
             Resource clean up.
             </summary>
         </member>
+        <member name="T:Ephemera.NBagOfTricks.PNUT.TestFailException">
+            <summary>
+            Specific exception type.
+            </summary>
+        </member>
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestFailException.#ctor(System.String,System.Int32)">
+            <summary>
+            Specific exception type.
+            </summary>
+        </member>
         <member name="T:Ephemera.NBagOfTricks.PNUT.OutputFormat">
             <summary>
             Generate a human readable or junit format output.
@@ -811,26 +824,6 @@
         <member name="P:Ephemera.NBagOfTricks.PNUT.TestContext.PropertyLines">
             <summary></summary>
         </member>
-        <member name="T:Ephemera.NBagOfTricks.PNUT.AssertException">
-            <summary>
-            Specific exception type.
-            </summary>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.AssertException.#ctor(System.String,System.String,System.Int32)">
-            <summary>
-            Specific exception type.
-            </summary>
-        </member>
-        <member name="T:Ephemera.NBagOfTricks.PNUT.TestFailException">
-            <summary>
-            Specific exception type.
-            </summary>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestFailException.#ctor(System.String,System.Int32)">
-            <summary>
-            Specific exception type.
-            </summary>
-        </member>
         <member name="T:Ephemera.NBagOfTricks.PNUT.TestRunner">
             <summary>
             The orchestrator of the test execution.
@@ -841,6 +834,9 @@
         </member>
         <member name="F:Ephemera.NBagOfTricks.PNUT.TestRunner.DATE_TIME_FORMAT_MSEC">
             <summary>Format string.</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfTricks.PNUT.TestRunner.ATTENTION">
+            <summary>Report visual marker.</summary>
         </member>
         <member name="P:Ephemera.NBagOfTricks.PNUT.TestRunner.Context">
             <summary>The test context.</summary>
@@ -854,12 +850,21 @@
             <summary>
             Run selected cases.
             </summary>
-            <param name="which">List of names of test cases to run. If the test case names begin with these values they will run.</param>
+            <param name="which">List of test suites to run - if suite name starts with which.</param>
         </member>
         <member name="T:Ephemera.NBagOfTricks.PNUT.TestSuite">
             <summary>
             Defining class for an individual test suite.
             </summary>
+        </member>
+        <member name="F:Ephemera.NBagOfTricks.PNUT.TestSuite.FAIL">
+            <summary>Report visual marker.</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfTricks.PNUT.TestSuite.PROP">
+            <summary>Report visual marker.</summary>
+        </member>
+        <member name="F:Ephemera.NBagOfTricks.PNUT.TestSuite.INFO">
+            <summary>Report visual marker.</summary>
         </member>
         <member name="P:Ephemera.NBagOfTricks.PNUT.TestSuite.CaseCnt">
             <summary>Accumulated count.</summary>
@@ -897,20 +902,19 @@
             </summary>
             <param name="message"></param>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_STOP_ON_FAIL(System.Boolean)">
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.StopOnFail(System.Boolean)">
             <summary>
             Toggle the fatal bail out mechanism.
             </summary>
             <param name="value">True/false</param>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_INFO(System.String,System.Object[])">
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.Info(System.String)">
             <summary>
             Print some info to the report.
             </summary>
             <param name="message">Info text</param>
-            <param name="vars">Optional vars to print</param>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_PROPERTY``1(System.String,``0)">
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.Property``1(System.String,``0)">
             <summary>
             Add an element to the property collection.
             </summary>
@@ -918,167 +922,37 @@
             <param name="name"></param>
             <param name="value"></param>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_FAIL(System.String,System.String,System.Int32)">
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.Assert(System.Boolean,System.String,System.String,System.String,System.Int32)">
             <summary>
-            Always fail.
+            General purpose assert. Step fails if condition is false.
             </summary>
+            <param name="condition"></param>
             <param name="message"></param>
+            <param name="expr"></param>
             <param name="file"></param>
             <param name="line"></param>
             <returns></returns>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_TRUE(System.Boolean,System.String,System.Int32)">
-            <summary>
-            Checks whether the given condition is true.
-            </summary>
-            <param name="condition"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_FALSE(System.Boolean,System.String,System.Int32)">
-            <summary>
-            Checks whether the given condition is false.
-            </summary>
-            <param name="condition"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_NULL(System.Object,System.String,System.Int32)">
-            <summary>
-            Checks whether the given object is null.
-            </summary>
-            <param name="obj"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_NOT_NULL(System.Object,System.String,System.Int32)">
-            <summary>
-            Checks whether the given object is not null.
-            </summary>
-            <param name="obj"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_ASSERT``1(``0,``0,System.String,System.Int32)">
-            <summary>
-            Prints the condition and gens assert exception.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_EQUAL``1(``0,``0,System.String,System.Int32)">
-            <summary>
-            Checks whether the first parameter is equal to the second.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_NOT_EQUAL``1(``0,``0,System.String,System.Int32)">
-            <summary>
-            Checks whether the first parameter is not equal to the second.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_LESS``1(``0,``0,System.String,System.Int32)">
-            <summary>
-            Checks whether the first parameter is less than the second.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_LESS_OR_EQUAL``1(``0,``0,System.String,System.Int32)">
-            <summary>
-            Checks whether the first parameter is less than or equal to the second.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_GREATER``1(``0,``0,System.String,System.Int32)">
-            <summary>
-            Checks whether the first parameter is greater than the second.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_GREATER_OR_EQUAL``1(``0,``0,System.String,System.Int32)">
-            <summary>
-            Checks whether the first parameter is greater than or equal to the second.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_CLOSE(System.Double,System.Double,System.Double,System.String,System.Int32)">
-            <summary>
-            Checks whether the first parameter is within the given tolerance from the second parameter.
-            This is useful for comparing floating point values.
-            </summary>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="tolerance">Absolute</param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_STRING_CONTAINS(System.String,System.String,System.String,System.Int32)">
-            <summary>
-            Check for part of a string.
-            </summary>
-            <param name="value1"></param>
-            <param name="value2"></param>
-            <param name="file"></param>
-            <param name="line"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_THROWS(System.Type,System.Action,System.String,System.Int32)">
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.Throws(System.Type,System.Action,System.String,System.String,System.Int32)">
             <summary>
             Does the Action code throw?
             </summary>
             <param name="exType"></param>
             <param name="act"></param>
+            <param name="message"></param>
             <param name="file"></param>
             <param name="line"></param>
-            <returns></returns>
+            <returns>Thrown exception for examination or null if no throw.</returns>
         </member>
-        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.UT_THROWS_NOT(System.Action,System.String,System.Int32)">
+        <member name="M:Ephemera.NBagOfTricks.PNUT.TestSuite.ThrowsNot(System.Action,System.String,System.String,System.Int32)">
             <summary>
             Does the Action code not throw?
             </summary>
             <param name="act"></param>
+            <param name="message"></param>
             <param name="file"></param>
             <param name="line"></param>
-            <returns></returns>
+            <returns>Thrown exception for examination or null if no throw.</returns>
         </member>
         <member name="F:Ephemera.NBagOfTricks.SettingsCore._fp">
             <summary>The fully  qualified file path.</summary>
@@ -1353,7 +1227,7 @@
         </member>
         <member name="M:Ephemera.NBagOfTricks.Tools.RunScript(System.String,System.Action{System.String},System.Action{System.String},System.IO.TextReader)">
             <summary>
-            Run a script in external process. Handles py/lua/ps1/cmd/bat. This is primarily to be used as a
+            Run a script in external blocking process. Handles py/lua/ps1/cmd/bat. This is primarily to be used as a
             run-to-completion format. Currently there is no clean way to kill a running script or to support
             continuous input.
             Liberally borrowed from http://csharptest.net/532/using-processstart-to-capture-console-output/index.html

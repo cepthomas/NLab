@@ -19,6 +19,16 @@ namespace NLab
         public bool IsError { get; } = isError;
     }
 
+    [Serializable]
+    public sealed class HotKey
+    {
+        public string Key { get; set; } = "?";
+        public bool Ctrl { get; set; } = false;
+        public bool Alt { get; set; } = false;
+        public bool Shift { get; set; } = false;
+        public bool Win { get; set; } = false;
+    }
+
     public static class Utils
     {
         public const string ERR = "ERR";

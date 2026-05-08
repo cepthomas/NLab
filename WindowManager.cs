@@ -4,15 +4,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-
 using System.Windows.Forms;
-
-
-//using System.Threading;
 using Ephemera.NBagOfTricks;
 using W32 = Ephemera.Win32.Internals;
 using WM = Ephemera.Win32.WindowManagement;
-
 
 
 namespace NLab
@@ -67,12 +62,12 @@ namespace NLab
                 // Left pane.
                 WM.MoveWindow(fgHandle, loc);
                 WM.ResizeWindow(fgHandle, sz);
-                WM.ForegroundWindow = fgHandle;
+//Can't!                WM.ForegroundWindow = fgHandle;
                 // Right pane.
                 loc.Offset(sz.Width, 0);
                 WM.MoveWindow(rightPane.Handle, loc);
                 WM.ResizeWindow(rightPane.Handle, sz);
-                WM.ForegroundWindow = rightPane.Handle;
+//Can't!                WM.ForegroundWindow = rightPane.Handle;
             }
             catch (Exception ex)
             {
