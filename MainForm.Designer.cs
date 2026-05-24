@@ -27,6 +27,7 @@ namespace NLab
             tvOutput = new TextViewer();
             BtnJumplist = new Button();
             BtnTray = new Button();
+            colorWheel1 = new Cyotek.Windows.Forms.ColorWheel();
             SuspendLayout();
             // 
             // BtnAsync
@@ -61,10 +62,11 @@ namespace NLab
             tvOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tvOutput.BorderStyle = BorderStyle.FixedSingle;
             tvOutput.Location = new Point(12, 59);
+            tvOutput.MatchUseBackground = true;
             tvOutput.MaxText = 10000;
             tvOutput.Name = "tvOutput";
             tvOutput.Prompt = "";
-            tvOutput.Size = new Size(688, 231);
+            tvOutput.Size = new Size(508, 479);
             tvOutput.TabIndex = 1;
             tvOutput.WordWrap = true;
             // 
@@ -86,11 +88,20 @@ namespace NLab
             BtnTray.Text = "Tray";
             BtnTray.UseVisualStyleBackColor = true;
             // 
+            // colorWheel1
+            // 
+            colorWheel1.Alpha = 1D;
+            colorWheel1.Location = new Point(536, 59);
+            colorWheel1.Name = "colorWheel1";
+            colorWheel1.Size = new Size(256, 256);
+            colorWheel1.TabIndex = 7;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(711, 298);
+            ClientSize = new Size(826, 546);
+            Controls.Add(colorWheel1);
             Controls.Add(BtnTray);
             Controls.Add(BtnJumplist);
             Controls.Add(BtnTracer);
@@ -112,5 +123,6 @@ namespace NLab
         private Button BtnTracer;
         private Button BtnJumplist;
         private Button BtnTray;
+        private Cyotek.Windows.Forms.ColorWheel colorWheel1;
     }
 }

@@ -131,11 +131,11 @@ namespace NLab
                 {
                    case W32.HSHELL_WINDOWCREATED:
                        WM.AppWindowInfo wi = WM.GetAppWindowInfo(handle);
-                       tvOutput.AppendLine($"WindowCreatedEvent:{handle} {wi.Title}");
+                       tvOutput.Append($"WindowCreatedEvent:{handle} {wi.Title}");
                        break;
 
                    case W32.HSHELL_WINDOWDESTROYED:
-                       tvOutput.AppendLine($"WindowDestroyedEvent:{handle}");
+                       tvOutput.Append($"WindowDestroyedEvent:{handle}");
                        break;
                 }
             }
@@ -153,7 +153,7 @@ namespace NLab
 
                if ((key != Keys.None) && (mod & W32.MOD_ALT) > 0 && (mod & W32.MOD_CTRL) > 0)
                {
-                    tvOutput.AppendLine($"Hotkey:{key}");
+                    tvOutput.Append($"Hotkey:{key}");
                    //switch (key) etc...
                }
             }
@@ -203,17 +203,17 @@ namespace NLab
 
 
 
-        public List<string> Dump()
-        {
-            List<string> res = [];
-            _itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
-            return res;
-        } >>>>
-        public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
-        {
-            foreach (var item in s)
-                yield return f(item);
-        }
+    //public List<string> Dump()
+    //{
+    //    List<string> res = [];
+    //    _itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
+    //    return res;
+    //} >>>>
+    //public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
+    //{
+    //    foreach (var item in s)
+    //        yield return f(item);
+    //}
 
 
 
