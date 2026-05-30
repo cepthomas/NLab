@@ -49,12 +49,15 @@ namespace NLab
 
             // Icons.
             using PixelBitmap pbmp = new("glyphicons-22-snowflake.png");
-            pbmp.Colorize(Color.LightGreen, Color.FromArgb(0x80, 0x80, 0x80));
+            pbmp.Colorize(Color.Green, Color.FromArgb(0x00, 0x00, 0x00));
             using var img1 = pbmp.GetBitmap();
-            pbmp.Colorize(Color.HotPink, Color.LightGreen);
-            using var img2 = pbmp.GetBitmap();
             _icon1 = GraphicsUtils.CreateIcon(img1);
+            GraphicsUtils.SaveIcon(_icon1, "icon1.png");
+
+            pbmp.Colorize(Color.Red, Color.Green);
+            using var img2 = pbmp.GetBitmap();
             _icon2 = GraphicsUtils.CreateIcon(img2);
+            GraphicsUtils.SaveIcon(_icon2, "icon2.png");
 
             // Notify icon.
             _notifyIcon = new(_components)

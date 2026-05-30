@@ -116,7 +116,7 @@ namespace NLab
 
             ///// ---> fake pinned files.
             List<JumpListLink> pinnedItems = [];
-            DirectoryInfo diPinned = new(@"C:\Dev\Misc\WinBagOfTricks\TestFiles");
+            DirectoryInfo diPinned = new(@"C:\Dev\Misc\NLab\TestFiles");
 
             // Get the links.
             foreach (var fs in diPinned.GetFiles())
