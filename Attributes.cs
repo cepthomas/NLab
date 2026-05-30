@@ -15,10 +15,11 @@ using System.Xml;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
 
-#pragma warning disable IDE0290 // Use primary constructor
 
 namespace NLab
 {
+    ///// Playing with attributes.
+
     // 1. Component interface
     public interface IService
     {
@@ -76,15 +77,12 @@ namespace NLab
 
 
     //////////////////////////////////////////////////////////////////////////////////
-
-
     // https://gist.github.com/dimitris-papadimitriou-chr/f5ade388a4e6b64fb1a9dbf0ab084756
     //namespace FunctionalExperimentation.SimpleRefactorings.Medium.Decorator1
-
     public static partial class FuntionalExtensions
     {
         /// <summary>
-        /// Adds a debug loggin on the Task Result.
+        /// Adds a debug logging on the Task Result.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
@@ -103,6 +101,5 @@ namespace NLab
                 action(result);
                 return result;
             });
-         
     }
 }

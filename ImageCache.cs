@@ -15,7 +15,7 @@ using Ephemera.NBagOfTricks;
 namespace Ephemera.IconicSelector
 {
     /// <summary></summary>
-    internal class ImageCache : IDisposable //TODO probably don't need.
+    internal class ImageCache : IDisposable
     {
         /// <summary></summary>
         readonly Dictionary<string, Image> _images = [];
@@ -58,7 +58,7 @@ namespace Ephemera.IconicSelector
             {
                 throw new InvalidOperationException($"Cached already contains [{imgName}]");
             }
-            var img = bmp.Resize(_imageSize, _imageSize);
+            var img = MiscUtils.ResizeBitmap(bmp, _imageSize, _imageSize);
             _images.Add(imgName, img);
         }
 

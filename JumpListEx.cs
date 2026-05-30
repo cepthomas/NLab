@@ -10,7 +10,7 @@ using System.IO;
 using System.Reflection;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using Microsoft.WindowsAPICodePack.Shell;
-using Ephemera.NBagOfTricks;
+//using Ephemera.NBagOfTricks;
 
 
 namespace NLab

@@ -17,6 +17,9 @@ using Ephemera.NBagOfUis;
 
 namespace NLab
 {
+    // Experiments with *.lnk files. It's complicated.
+    // file spec: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/16cb4ca1-9339-4d0c-a68d-bf1d6cc0f943?redirectedfrom=MSDN
+
     public class LinkFiles
     {
         public static string? GetLinkTarget(string filepath)
@@ -25,10 +28,7 @@ namespace NLab
             // NG @"%PROGRAMDATA%\Microsoft\Windows\Start Menu\Programs\Administrative Tools\Performance Monitor.lnk",
 
             string? path = null;
-
-
             var bytes = File.ReadAllBytes(filepath);
-
 
             try
             {
@@ -112,7 +112,7 @@ namespace NLab
 
                 // the offset is from the beginning of the file info struct (fileInfoStartsAt)
                 index = fileInfoStartsAt + fileOffset; // Seek to beginning of base pathname (target)
-                // read the base pathname. I don't need the 2 terminating nulls    <<<================
+                // read the base pathname. I don't need the 2 terminating nulls    <<<???
                 int pathLength = totalStructLength + fileInfoStartsAt - index - 2;
                 //fileStream.Seek(fileInfoStartsAt + fileOffset, SeekOrigin.Begin); // Seek to beginning of base pathname (target)
                 //long pathLength = totalStructLength + fileInfoStartsAt - fileStream.Position - 2; // read the base pathname. I don't need the 2 terminating nulls.
@@ -128,8 +128,7 @@ namespace NLab
                 string asciiString = Encoding.ASCII.GetString(targetBytes);
                 var link = utf8String;
 
-
-                int begin = link.IndexOf("\0\0"); // TODO1 returns 0???
+                int begin = link.IndexOf("\0\0"); // TODO returns 0???
                 if (begin > -1)
                 {
                     int end = link.IndexOf("\\\\", begin + 2) + 2;
@@ -161,12 +160,7 @@ namespace NLab
         /// <returns></returns>
         public static string? GetLinkTarget_orig(string filepath)
         {
-            //python version  https://stackoverflow.com/a/28952464
-            //file spec  https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/16cb4ca1-9339-4d0c-a68d-bf1d6cc0f943?redirectedfrom=MSDN
-
-            // ok @"%PROGRAMDATA%\Microsoft\Windows\Start Menu\Programs\Firefox.lnk",
-            // ng @"%PROGRAMDATA%\Microsoft\Windows\Start Menu\Programs\Administrative Tools\Performance Monitor.lnk",
-
+            // python version  https://stackoverflow.com/a/28952464
 
             string? path = null;
 
@@ -198,9 +192,10 @@ namespace NLab
 
                 // Skip to the path position (subtract the length of the read (4 bytes), the length of
                 // the skip (12 bytes), and the length of the lbpos read (4 bytes) from the lbpos)
-                br.ReadBytes((int)lbpos - 0x14); //TODO1 lbpos is 0 for:
-                                                 //C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Administrative Tools\Performance Monitor.lnk
-                                                 //C:\ProgramData\Microsoft\Windows\Start Menu\Programs\System Tools\Task Manager.lnk
+                br.ReadBytes((int)lbpos - 0x14);
+                //TODO lbpos is 0 for:
+                //C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Administrative Tools\Performance Monitor.lnk
+                //C:\ProgramData\Microsoft\Windows\Start Menu\Programs\System Tools\Task Manager.lnk
 
                 var size = length - lbpos - 0x02;
                 var bytePath = br.ReadBytes((int)size);
@@ -213,52 +208,5 @@ namespace NLab
 
             return path;
         }
-
-
-
-        // /// <summary>
-        // /// Version that doesn't throw. TODO1 put somewhere else?
-        // /// </summary>
-        // /// <param name="name"></param>
-        // /// <returns></returns>
-        // public static Icon? SafeExtractIcon(string name)
-        // {
-        //     try
-        //     {
-        //         var icon = Icon.ExtractAssociatedIcon(name);
-        //         return icon;
-        //     }
-        //     catch (Exception)
-        //     {
-        //         return null;
-        //     }
-        // }
-
-        // /// <summary>Resize the image to the specified width and height.</summary>
-        // /// <param name="bmp">The image to resize.</param>
-        // /// <param name="width">The width to resize to.</param>
-        // /// <param name="height">The height to resize to.</param>
-        // /// <returns>The resized image.</returns>
-        // public static Bitmap ResizeBitmap(Bitmap bmp, int width, int height)
-        // {
-        //     Bitmap result = new(width, height);
-        //     result.SetResolution(bmp.HorizontalResolution, bmp.VerticalResolution);
-
-        //     using (Graphics graphics = Graphics.FromImage(result))
-        //     {
-        //         // Set high quality.
-        //         graphics.CompositingQuality = CompositingQuality.HighQuality;
-        //         graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        //         graphics.SmoothingMode = SmoothingMode.HighQuality;
-        //         graphics.CompositingQuality = CompositingQuality.HighQuality;
-        //         graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        //         graphics.SmoothingMode = SmoothingMode.HighQuality;
-
-        //         // Draw the image.
-        //         graphics.DrawImage(bmp, 0, 0, result.Width, result.Height);
-        //     }
-
-        //     return result;
-        // }
     }
 }

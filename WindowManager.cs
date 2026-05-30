@@ -12,6 +12,7 @@ using WM = Ephemera.Win32.WindowManagement;
 
 namespace NLab
 {
+    // Playing with windows at win32 level.
     public class WindowManager : Form
     {
         #region Fields
