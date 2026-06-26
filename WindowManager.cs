@@ -16,9 +16,9 @@ namespace NLab
     public class WindowManager : Form
     {
         #region Fields
-        bool opt = false;
-        string layout = "???";
-        bool _running = true;
+        //bool opt = false;
+        //string layout = "???";
+        //bool _running = true;
         #endregion
 
         /// <summary>Hook message processing.</summary>
@@ -116,13 +116,13 @@ namespace NLab
                 }
                 // else do something?
 
-              //  if ((key != Keys.None) && (mod & W32.MOD_ALT) > 0 && (mod & W32.MOD_CTRL) > 0)
+                //  if ((key != Keys.None) && (mod & W32.MOD_ALT) > 0 && (mod & W32.MOD_CTRL) > 0)
                 if ((key != Keys.None) && (mod & W32.MOD_CTRL) > 0)
                 {
                     Console.WriteLine($"Hotkey:{key}");
                     //switch (key) etc...
 
-                    _running = false;
+                    //_running = false;
                 }
             }
 

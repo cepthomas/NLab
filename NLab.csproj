@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+
         <!-- WinExe=form only Exe=form plus console -->
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <TargetFramework>net8.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
@@ -10,7 +11,10 @@
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
         <NoWarn>CA1816;CA1822;CS8602;SYSLIB1054</NoWarn>
         <OutputPath>bin\</OutputPath>
+        <ApplicationIcon>canard.ico</ApplicationIcon>
         <Platforms>AnyCPU;x64</Platforms>
+        <!-- <DefineConstants>DEBUG;TRACE</DefineConstants> -->
+        
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,12 +24,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="nlab.sublime-project" />
-        <None Remove="nlab.sublime-workspace" />
+      <Content Include="canard.ico" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+        <PackageReference Include="NAudio" Version="2.3.0" />
     </ItemGroup>
 
     <ItemGroup>

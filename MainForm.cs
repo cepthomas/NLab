@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using NAudio.Wave;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
 using W32 = Ephemera.Win32.Internals;
@@ -53,6 +54,51 @@ namespace NLab
             _hHook1 = W32.RegisterShellHook(Handle);
             W32.RegisterHotKey(Handle, (int)Keys.Z, W32.MOD_ALT | W32.MOD_CTRL);
             W32.RegisterHotKey(Handle, (int)Keys.B, W32.MOD_CTRL);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            BackColor = Color.Pink;
+
+            //// Add items to lv.
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    listView1.Items.Add($"Item {i} AAA BBB CCC DDD", i % 2);
+            //}
+
+            //listView1.View = View.List; // List  Details  LargeIcon
+
+
+            List<WaveInCapabilities> recin = [];
+            for (int id = -1; id < WaveIn.DeviceCount; id++) // –1 indicates the default output device, while 0 is the first output device.
+            {
+                var cap = WaveIn.GetCapabilities(id);
+                recin.Add(cap);
+
+                Debug.WriteLine($"IN: {id} {cap.ProductName}");
+            }
+
+            List<WaveOutCapabilities> recout = [];
+            for (int id = -1; id < WaveOut.DeviceCount; id++) // –1 indicates the default output device, while 0 is the first output device.
+            {
+                var cap = WaveOut.GetCapabilities(id);
+                recout.Add(cap);
+
+                Debug.WriteLine($"OUT: {id} {cap.ProductName}");
+            }
+
+            //IN: -1 Microsoft Sound Mapper
+            //IN: 0 Microphone (Realtek(R) Audio)
+            //IN: 1 Microphone Array (Intel® Smart 
+            //OUT: -1 Microsoft Sound Mapper
+            //OUT: 0 Headphones (Realtek(R) Audio)
+            //OUT: 1 Speakers (Realtek(R) Audio)
+
+
+
+
+
+            base.OnLoad(e);
         }
 
         /// <summary>

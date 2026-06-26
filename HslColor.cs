@@ -5,11 +5,13 @@ using System.Text;
 using System.Windows.Forms;
 
 // http://cyotek.com/blog/tag/colorpicker
+#nullable disable
 
 
-namespace Cyotek.Windows.Forms
+namespace NLab
 {
     // http://en.wikipedia.org/wiki/HSL_color_space
+
 
     [Serializable]
     public struct HslColor

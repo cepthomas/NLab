@@ -134,8 +134,8 @@ namespace NLab
                     int end = link.IndexOf("\\\\", begin + 2) + 2;
                     end = link.IndexOf('\0', end) + 1;
 
-                    string firstPart = link.Substring(0, begin);
-                    string secondPart = link.Substring(end);
+                    string firstPart = link[..begin];
+                    string secondPart = link[end..];
 
                     return firstPart + secondPart;
                 }
@@ -144,7 +144,7 @@ namespace NLab
                     return link;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
 
@@ -202,7 +202,7 @@ namespace NLab
 
                 path = Encoding.UTF8.GetString(bytePath, 0, bytePath.Length);
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
 

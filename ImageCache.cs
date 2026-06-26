@@ -12,7 +12,7 @@ using System.Diagnostics;
 using Ephemera.NBagOfTricks;
 
 
-namespace Ephemera.IconicSelector
+namespace NLab
 {
     /// <summary></summary>
     internal class ImageCache : IDisposable

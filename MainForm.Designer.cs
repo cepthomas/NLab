@@ -27,7 +27,7 @@ namespace NLab
             tvOutput = new TextViewer();
             BtnJumplist = new Button();
             BtnTray = new Button();
-            colorWheel1 = new Cyotek.Windows.Forms.ColorWheel();
+            colorWheel1 = new ColorWheel();
             SuspendLayout();
             // 
             // BtnAsync
@@ -123,6 +123,6 @@ namespace NLab
         private Button BtnTracer;
         private Button BtnJumplist;
         private Button BtnTray;
-        private Cyotek.Windows.Forms.ColorWheel colorWheel1;
+        private ColorWheel colorWheel1;
     }
 }
