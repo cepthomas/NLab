@@ -27,11 +27,6 @@ namespace NLab
         /// <summary>Build me one.</summary>
         public void DoIt()
         {
-            // Default start location.
-            string startDir = Environment.CurrentDirectory;
-            var exe = Environment.GetEnvironmentVariable("TOOLS_PATH");
-            var inifile = Path.Join(exe, "winmgr.ini");
-
             _hookMsg = W32.RegisterShellHook(Handle); // test for 0?
             W32.RegisterHotKey(Handle, (int)Keys.A, W32.MOD_ALT | W32.MOD_CTRL);
             W32.RegisterHotKey(Handle, (int)Keys.X, W32.MOD_CTRL);
