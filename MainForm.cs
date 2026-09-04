@@ -21,6 +21,19 @@ using WM = Ephemera.Win32.WindowManagement;
 using static NLab.Utils;
 
 
+//public List<string> Dump()
+//{
+//    List<string> res = [];
+//    _itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
+//    return res;
+//} >>>>
+//public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
+//{
+//    foreach (var item in s)
+//        yield return f(item);
+//}
+
+
 namespace NLab
 {
     public partial class MainForm : Form
@@ -65,9 +78,7 @@ namespace NLab
             //{
             //    listView1.Items.Add($"Item {i} AAA BBB CCC DDD", i % 2);
             //}
-
             //listView1.View = View.List; // List  Details  LargeIcon
-
 
             List<WaveInCapabilities> recin = [];
             for (int id = -1; id < WaveIn.DeviceCount; id++) // –1 indicates the default output device, while 0 is the first output device.
@@ -93,10 +104,6 @@ namespace NLab
             //OUT: -1 Microsoft Sound Mapper
             //OUT: 0 Headphones (Realtek(R) Audio)
             //OUT: 1 Speakers (Realtek(R) Audio)
-
-
-
-
 
             base.OnLoad(e);
         }
@@ -131,27 +138,9 @@ namespace NLab
             W32.RegisterHotKey(Handle, key, mod);
         }
 
-
-
-
-
-
-
-        async void AsyncClick(object? sender, EventArgs e)
-        {
-            Reset();
-            var x = new AsyncAwait();
-            var res = await x.Go();
-            Tell(INF, $"res:{res}");
-        }
-
-        void TasksClick(object? sender, EventArgs e)
-        {
-            Reset();
-            var x = new TaskWithoutAsync();
-            x.Go();
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
         void TracerClick(object? sender, EventArgs e)
         {
             Reset();
@@ -207,151 +196,44 @@ namespace NLab
             base.WndProc(ref message);
         }
 
-
-        ///// <summary>
-        ///// Low level keyboard hook function. Other way to implement hotkeys - from WinClip
-        ///// </summary>
-        ///// <param name="code">Virtual-key code in the range 1 to 254. If less than zero, pass the message to the CallNextHookEx function without further processing.</param>
-        ///// <param name="wParam">One of the following messages: WM_KEYDOWN WM_KEYUP WM_SYSKEYDOWN WM_SYSKEYUP.</param>
-        ///// <param name="lParam">Pointer to a KBDLLHOOKSTRUCT structure.</param>
-        ///// <returns>Return value from call to next in chain or >0 for handled locally</returns>
-        //int KeyboardHookProc(int code, int wParam, ref W32.KBDLLHOOKSTRUCT lParam)
-        //{
-        //    bool handled = false;
-        //    if (code >= 0)
-        //    {
-        //        Keys key = (Keys)lParam.vkCode;
-        //        bool keyDown = wParam == W32.WM_KEYDOWN || wParam == W32.WM_SYSKEYDOWN;
-        //        bool keyUp = wParam == W32.WM_KEYUP || wParam == W32.WM_SYSKEYUP;
-        //        bool letterPressed = key == Keys.R && keyDown;
-        //        bool winKey = (key == Keys.LWin || key == Keys.RWin) && keyDown;
-        //        bool ctrlKey = (key & Keys.Control) > 0 && keyDown;
-        //        bool altKey = (key & Keys.Alt) > 0 && keyDown;
-        //    }
-        //    if (handled)
-        //    {
-        //        // If the hook procedure processed the message, it may return a nonzero value to prevent
-        //        // the system from passing the message to the rest of the hook chain or the target window procedure.
-        //        return 1;
-        //    }
-        //    else
-        //    {
-        //        // Pass along chain.
-        //        return W32.CallNextHookEx(_hHook, code, wParam, ref lParam);
-        //    }
-        //}
-
+#if _OTHER
+        /// <summary>
+        /// Low level keyboard hook function. Other way to implement hotkeys - from WinClip
+        /// </summary>
+        /// <param name="code">Virtual-key code in the range 1 to 254. If less than zero, pass the message to the CallNextHookEx function without further processing.</param>
+        /// <param name="wParam">One of the following messages: WM_KEYDOWN WM_KEYUP WM_SYSKEYDOWN WM_SYSKEYUP.</param>
+        /// <param name="lParam">Pointer to a KBDLLHOOKSTRUCT structure.</param>
+        /// <returns>Return value from call to next in chain or >0 for handled locally</returns>
+        int KeyboardHookProc(int code, int wParam, ref W32.KBDLLHOOKSTRUCT lParam)
+        {
+           bool handled = false;
+           if (code >= 0)
+           {
+               Keys key = (Keys)lParam.vkCode;
+               bool keyDown = wParam == W32.WM_KEYDOWN || wParam == W32.WM_SYSKEYDOWN;
+               bool keyUp = wParam == W32.WM_KEYUP || wParam == W32.WM_SYSKEYUP;
+               bool letterPressed = key == Keys.R && keyDown;
+               bool winKey = (key == Keys.LWin || key == Keys.RWin) && keyDown;
+               bool ctrlKey = (key & Keys.Control) > 0 && keyDown;
+               bool altKey = (key & Keys.Alt) > 0 && keyDown;
+           }
+           if (handled)
+           {
+               // If the hook procedure processed the message, it may return a nonzero value to prevent
+               // the system from passing the message to the rest of the hook chain or the target window procedure.
+               return 1;
+           }
+           else
+           {
+               // Pass along chain.
+               return W32.CallNextHookEx(_hHook, code, wParam, ref lParam);
+           }
+        }
+#endif
         #endregion
     }
 
-
-
-
-
-
-    //public List<string> Dump()
-    //{
-    //    List<string> res = [];
-    //    _itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
-    //    return res;
-    //} >>>>
-    //public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
-    //{
-    //    foreach (var item in s)
-    //        yield return f(item);
-    //}
-
-
-
-    class AsyncAwait
-    {
-        public async Task<int> Go()
-        {
-            string state = "Async_Await";
-
-            Tell(INF, $"enter");
-
-            var lroa_result = LongRunningOperationAsync();
-
-            // task independent stuff here
-            SyncTimeEater(300);
-
-            Tell(INF, $"100");
-
-            await AwaitableBackgroundTask(state);
-
-            Tell(INF, $"200");
-
-            // execute sync function as async
-            var xdoc = new XmlDocument();
-            await Task.Run(() => xdoc.Load("http://feeds.feedburner.com/soundcode"));
-
-            Tell(INF, $"exit [{xdoc.ChildNodes[1].InnerText.Left(32)}]");
-
-            return 909;
-        }
-
-        // A long-running operation that returns an int.
-        async Task<int> LongRunningOperationAsync()
-        {
-            Tell(INF, $"enter");
-
-            await Task.Delay(1000); // 1 second delay
-
-            Tell(INF, $"exit");
-
-            return 999;
-        }
-
-        async Task AwaitableBackgroundTask(string state)
-        {
-            Tell(INF, $"enter");
-
-            int i = 5;
-            var task = Task.Run(() => { return SyncFunction(state); });
-
-            // a synchronous function - runs in new thread
-            int SyncFunction(string s)
-            {
-                Tell(INF, $"enter SyncFunction");
-                return s.Length + i;
-            }
-
-            Tell(INF, $"100");
-
-            // run calculate as async - returns int answer
-            var myOutput = await task;
-
-            Tell(INF, $"exit [{myOutput}]");
-        }
-    }
-
-    class TaskWithoutAsync
-    {
-        public void Go()
-        {
-            void Callback() { Tell(INF, "Callback()"); }
-
-            int id = 1;
-            List<Worker> workers = [new(id++), new(id++), new(id++)];
-
-            var tasks = workers.Select(t => t.DoWorkAsync($"some data for {t.Name}"));
-
-            Task.WhenAll(tasks).ContinueWith(task => Callback());
-
-            Tell(INF, "Waiting");
-
-            // TODO stuff like this:
-            // using CancellationTokenSource ts = new();
-            // using Task taskKeyboard = Task.Run(() => DoKeyboard(ts.Token));
-            // using Task taskComm = Task.Run(() => _comm.Run(ts.Token));
-            // ----
-            // ts.Cancel();
-            // Task.WaitAll([taskKeyboard, taskComm]);
-        }
-    }
-
-    class TracerPlay
+    class TracerPlay // TODO1 put in NBOT test?
     {
         public int Go(double dval, Rectangle rect)
         {
@@ -405,7 +287,7 @@ namespace NLab
         }
     }
 
-    class DelegateLambda // TODO
+    class DelegateLambda // TODO1 absorb
     {
         // Delegates are really just structural typing for functions. You could do the same thing with nominal typing and 
         // implementing an anonymous class that implements an interface or abstract class, but that ends up being a lot of 
@@ -446,7 +328,7 @@ namespace NLab
         // Test(D2); // Not allowed, method must match signature
     }
 
-    // General purpose target class for tests.
+    // General purpose target class for tests. TODO1?
     class Worker(int id)
     {
         public string Name { get { return $"Worker{_id}"; } }
@@ -470,71 +352,4 @@ namespace NLab
             Tell(INF, $"exit");
         }
     }
-
-    class AsyncSocket // TODO dev and migrate to nterm
-    {
-        //  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
-        const int packet_length = 2;  // user defined packet length
-
-        void DoAsync()
-        {
-            RunServerAsync();
-        }
-
-        async void RunServerAsync()
-        {
-            var listner = new TcpListener(IPAddress.Any, 59120);
-            listner.Start();
-            try
-            {
-                while (true)
-                {
-                    // was await Accept(await listner.AcceptTcpClientAsync());
-                    TcpClient client = await listner.AcceptTcpClientAsync();
-                    await Accept(client);
-                }
-            }
-            finally
-            {
-                listner.Stop();
-            }
-        }
-
-        async Task Accept(TcpClient client)
-        {
-            await Task.Yield();
-            try
-            {
-                using (client)
-                using (NetworkStream n = client.GetStream())
-                {
-                    byte[] data = new byte[packet_length];
-                    int bytesRead = 0;
-                    int chunkSize = 1;
-
-                    while (bytesRead < data.Length && chunkSize > 0)
-                    {
-                        bytesRead += chunkSize = await n.ReadAsync(data, bytesRead, data.Length - bytesRead);
-                    }
-
-                    // get data
-                    string str = Encoding.Default.GetString(data);
-                    Console.WriteLine("[server] received : {0}", str);
-
-                    // To do
-                    // ...
-
-                    // send the result to client
-                    string send_str = "server_send_test";
-                    byte[] send_data = Encoding.ASCII.GetBytes(send_str);
-                    await n.WriteAsync(send_data, 0, send_data.Length);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-    }
-
 }
