@@ -51,8 +51,8 @@ namespace NLab
 
             Move += (sender, e) => { Text = $"L:{Left} T:{Top} W:{Width} H:{Height}"; };
 
-            BtnAsync.Click += AsyncClick;
-            BtnTasks.Click += TasksClick;
+            //BtnAsync.Click += AsyncClick;
+            //BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
             //BtnJumplist.Click += JumplistClick;
             //BtnTray.Click += TrayClick;
