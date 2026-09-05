@@ -18,11 +18,13 @@ using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
 using W32 = Ephemera.Win32.Internals;
 using WM = Ephemera.Win32.WindowManagement;
-using static NLab.Utils;
+//using static NLab.Utils;
 
+//  TODO1 clean up in aisle 6.
 
 namespace NLab
 {
+    #region Long-running processes - Cleary
     // https://blog.stephencleary.com/2013/05/taskrun-vs-backgroundworker-round-1.html
     // I’ll leave you with a “combined” example. The code below starts a cancelable background
     // operation that reports progress, and will either throw an exception or return a value.
@@ -31,106 +33,22 @@ namespace NLab
     // little nuances of how it works (type safety, how easily the API can be misused, etc).
     // Then ask yourself: which code would I rather maintain?
 
-    // other maybe
+    // NB!!! - These are long-running but not forever, there's a significant difference for the app level.
+
+    // other maybe:
     // https://grantwinney.com/convert-backgroundworker-to-task-with-taskcompletionsource/
     // https://docs.lextudio.com/blog/how-to-replace-backgroundworker-with-async-await-and-tasks-80d7c8ed89dc
 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    class TopLevel
-    {
-        CancellationTokenSource _cts = new();
+    //await Task.Delay: Unlike Thread.Sleep(), this releases the thread back to the thread pool during the wait time.
+    //CancellationToken: Provides a safe mechanism to cleanly shut down the loop when your application stops.
 
-        // using Task taskComm = Task.Run(() => _comm.Run(ts.Token));
-
-
-        async void Go() // ==> was Main(string[] args)
-        {
-            var fail = true; // false
-            //_cts = new CancellationTokenSource();
-            var token = _cts.Token;
-
-            var progressHandler = new Progress<string>(value =>
-            {
-                Console.WriteLine(value);
-            });
-            var progress = progressHandler as IProgress<string>;
-
-            string args = "aaa bbb";
-            var w1 = new MyWork1(_cts, args);
-
-            //var w1_task = w1.DoIt();
-        }
-
-        void Cancel()
-        {
-            _cts?.Cancel();
-        }
-    }
-
-    class MyWork1
-    {
-        string _args;
-        CancellationTokenSource _cts;
-
-        public MyWork1(CancellationTokenSource cts, string args)
-        {
-            _cts = cts;
-            _args = args;
-        }
-
-        public int SomeFunc()
-        {
-            return _args.Length;
-        }
-
-        /// <summary>Main work loop.</summary>
-        /// <see cref="IComm"/>
-        public async void DoIt(CancellationToken token, IProgress<string> progress)
-        {
-            bool fail = false;
-            try
-            {
-                var result = await Task.Run(() =>
-                {
-                    for (int i = 0; i != 100; ++i)
-                    {
-                        progress?.Report(i + "%");
-                        token.ThrowIfCancellationRequested();
-                        Thread.Sleep(100);
-                    }
-
-                    if (fail)
-                    {
-                        throw new InvalidOperationException("MyWork1 Requested to fail.");
-                    }
-
-                    return 13;
-                });
-
-                Console.WriteLine("MyWork1 Completed: " + result);
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine("MyWork1 Cancelled.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.GetType().Name + ": " + ex.Message);
-            }
-        }
-    }
-
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-    class ExTask // from example
+    class ExampleTask // from Cleary example
     {
         CancellationTokenSource _cts = new();
 
         async void Go() // ==> was Main(string[] args)
         {
             var fail = true; // false
-            //_cts = new CancellationTokenSource();
             var token = _cts.Token;
 
             var progressHandler = new Progress<string>(value =>
@@ -176,83 +94,50 @@ namespace NLab
         }
     }
 
-
-
-#if _XXX
-public class BackgroundWorker
-{
-    //await Task.Delay: Unlike Thread.Sleep(), this releases the thread back to the thread pool during the wait time.
-    //CancellationToken: Provides a safe mechanism to cleanly shut down the loop when your application stops.
-
-    private CancellationTokenSource _cts = new CancellationTokenSource();
-
-    public void Start()
+    // Corresponding OG bgw.
+    public class BackgroundWorker
     {
-        // Fire-and-forget the infinite background task
-        Task.Run(() => DoWorkAsync(_cts.Token));
-    }
+        CancellationTokenSource _cts = new CancellationTokenSource();
 
-    private async Task DoWorkAsync(CancellationToken cancellationToken)
-    {
-        while (!cancellationToken.IsCancellationRequested)
+        public void Start()
         {
-            try
-            {
-                // 1. Do your work here
-                Console.WriteLine("Processing data...");
-
-                // 2. Pause efficiently without blocking the thread pool
-                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                // Clean exit when cancelled
-                break; 
-            }
-            catch (Exception ex)
-            {
-                // Prevent unhandled exceptions from crashing the loop
-                Console.WriteLine($"Error occurred: {ex.Message}");
-            }
+            // Fire-and-forget the infinite background task
+            Task.Run(() => DoWorkAsync(_cts.Token));
         }
-        Console.WriteLine("Loop safely stopped.");
+
+        private async Task DoWorkAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    // 1. Do your work here
+                    Console.WriteLine("Processing data...");
+
+                    // 2. Pause efficiently without blocking the thread pool
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Clean exit when cancelled
+                    break; 
+                }
+                catch (Exception ex)
+                {
+                    // Prevent unhandled exceptions from crashing the loop
+                    Console.WriteLine($"Error occurred: {ex.Message}");
+                }
+            }
+            Console.WriteLine("Loop safely stopped.");
+        }
+
+        public void Stop()
+        {
+            _cts.Cancel(); // Triggers the cancellation token
+        }
     }
 
-    public void Stop()
-    {
-        _cts.Cancel(); // Triggers the cancellation token
-    }
-}
-
-
-task = Task.Run(async () =>  // <- marked async
-{
-    while (true)
-    {
-        DoWork();
-        await Task.Delay(10000, wtoken.Token); // <- await with cancellation
-    }
-}, wtoken.Token);
-
-
-Task t = Task.Run(async () =>
-{
-  while (true)
-  {
-    cts.Token.ThrowIfCancellationRequested(); // not long-running
-    try
-    {
-      "Running...".Dump(); // not long-running
-      await Task.Delay(500, cts.Token); // not executed by the thread pool
-    }
-    catch (TaskCanceledException ex) { }
-  }
-});
-#endif
-
-
-
-    class reporter
+    class Reporter // TODO May or may not be useful.
     {
         /// <summary>
         /// A progress implementation that sends progress reports to an observer stream.
@@ -301,31 +186,189 @@ Task t = Task.Run(async () =>
             }
         }
     }
+    #endregion
 
+    #region Helpers
+    /// <summary>Simulate synchronous real-world/time work. For test purposes only.
+    class SyncTimeEater
+    {
+        public SyncTimeEater(int msec)
+        {
+            var start = Msec();
+            while (Msec() < start + msec) { }
+        }
 
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
+        public static int Msec()
+        {
+            return (int)(1000 * (Stopwatch.GetTimestamp()) / Stopwatch.Frequency);
+        }
 
+    }
 
+    // General purpose target class for tests.
+    class Worker(int id)
+    {
+        public string Name { get { return $"Worker{_id}"; } }
+
+        int _id = id;
+
+        public Task DoWorkAsync(string data)
+        {
+            //Tell(INF, $"enter [{data}]");
+            // Task.Run() runs sync code asynchronously.
+            var t = Task.Run(() => DoWorkSync(data));
+            //Tell(INF, $"exit");
+            return t;
+        }
+
+        // sync do work
+        public void DoWorkSync(string data)
+        {
+            //Tell(INF, $"enter [{data}]");
+            new SyncTimeEater(100 * _id);
+            //Tell(INF, $"exit");
+        }
+    }
+    #endregion
+
+    #region Long-running processes - mine
+    public class NewBGW
+    {
+        CancellationTokenSource _cts = new();
+        int _failCount = 0;
+
+        public List<string> Results { get; set; } = [];
+
+        void Cancel()
+        {
+            _cts?.Cancel();
+        }
+
+        void WriteLine(string s)
+        {
+            Results.Add(s);
+            //Console.WriteLine(s);
+        }
+
+        public async Task Run(int count = 0) // was Main()
+        {
+            _failCount = count;
+
+            //using var cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
+            // Hook up progress reporting.
+            var progressHandler = new Progress<string>(value => { WriteLine(value); });
+            var progress = progressHandler as IProgress<string>;
+
+            // Fire off multiple long-running async background operations
+            Task task1 = RunBackgroundConsumerAsync("Consumer-A", _cts.Token, progress);
+            Task task2 = RunBackgroundConsumerAsync("Consumer-B", _cts.Token, progress);
+
+            // Do one of these:
+            // 1) Direct user console.
+            //WriteLine("Press any key to stop the background operations...");
+            //Console.ReadKey();
+
+            // 2) Wait for all loops to wrap up cleanly.
+            await Task.WhenAll(task1, task2);
+            WriteLine("All threads/tasks cleanly stopped.");
+
+            // 3) Handle Ctrl+C gracefully.
+            //Console.CancelKeyPress += (s, e) =>
+            //{
+            //    e.Cancel = true;
+            //    _cts.Cancel();
+            //};
+
+            // 4) Explicit.
+            //Cancel();
+
+        }
+
+        async Task RunBackgroundConsumerAsync(string name, CancellationToken token, IProgress<string> progress)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    // Simulate a FOREVER I/O bound wait (polling a queue, listening to API)
+                    // Use Task.Delay, NEVER Thread.Sleep inside an async method
+                    // await Task.Delay: Unlike Thread.Sleep(), this releases the thread back to the thread pool during the wait time.
+
+                    token.ThrowIfCancellationRequested(); // this??
+
+                    await Task.Delay(500, token);
+
+                    //Console.WriteLine($"[{name}] processed a batch at {DateTime.Now:HH:mm:ss}");
+                    progress.Report($"[{name}] processed a batch at {DateTime.Now:HH:mm:ss}");
+
+                    if (--_failCount == 0)
+                    {
+                        progress.Report($"[{name}] Requested to fail at {DateTime.Now:HH:mm:ss}");
+                        throw new InvalidOperationException("Requested to fail.");
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // This is expected when token.IsCancellationRequested triggers
+                    progress.Report($"[{name}] Requested to fail at {DateTime.Now:HH:mm:ss}");
+                    break;
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region TODO housecleaning
+    class OtherStuff
+    {
+        CancellationTokenSource _cts = new();
+
+        void ex1()
+        {
+            var task = Task.Run(async () =>  // <- marked async
+            {
+                while (true)
+                {
+                    //DoWork();
+                    await Task.Delay(500, _cts.Token); // <- await with cancellation
+                }
+            }, _cts.Token);
+        }
+
+        void ex2()
+        {
+            Task t = Task.Run(async () =>
+            {
+                while (true)
+                {
+                    _cts.Token.ThrowIfCancellationRequested(); // not long-running
+                    try
+                    {
+                        Console.WriteLine("Running..."); // not long-running
+                        await Task.Delay(500, _cts.Token); // not executed by the thread pool
+                    }
+                    catch (TaskCanceledException ex) { }
+                }
+            });
+        }
+    }
+
+    /////// My old crap - mostly useless //////
     public class AsyncPlay
     {
-        // host:
-        // BtnAsync.Click += AsyncClick;
-        // BtnTasks.Click += TasksClick;
-
         async void AsyncClick(object? sender, EventArgs e)
         {
-            Reset();
+            //Reset();
             var x = new AsyncAwait();
             var res = await x.Go();
-            Tell(INF, $"res:{res}");
+            //Tell(INF, $"res:{res}");
         }
 
         void TasksClick(object? sender, EventArgs e)
         {
-            Reset();
+            //Reset();
             var x = new TaskWithoutAsync();
             x.Go();
         }
@@ -337,43 +380,44 @@ Task t = Task.Run(async () =>
         {
             string state = "Async_Await";
 
-            Tell(INF, $"enter");
+            //Tell(INF, $"enter");
 
             var lroa_result = LongRunningOperationAsync();
 
             // task independent stuff here
-            SyncTimeEater(300);
+            new SyncTimeEater(300);
 
-            Tell(INF, $"100");
+            //Tell(INF, $"100");
 
             await AwaitableBackgroundTask(state);
 
-            Tell(INF, $"200");
+            //Tell(INF, $"200");
 
             // execute sync function as async
             var xdoc = new XmlDocument();
             await Task.Run(() => xdoc.Load("http://feeds.feedburner.com/soundcode"));
 
-            Tell(INF, $"exit [{xdoc.ChildNodes[1].InnerText.Left(32)}]");
+            //Tell(INF, $"exit [{xdoc.ChildNodes[1].InnerText.Left(32)}]");
 
             return 909;
         }
 
-        // A long-running operation that returns an int.
+        // A long-running async operation that returns an int.
         async Task<int> LongRunningOperationAsync()
         {
-            Tell(INF, $"enter");
+            //Tell(INF, $"enter");
 
-            await Task.Delay(1000); // 1 second delay
+            await Task.Delay(1000);
 
-            Tell(INF, $"exit");
+            //Tell(INF, $"exit");
 
             return 999;
         }
 
+        // async version of bgw.
         async Task AwaitableBackgroundTask(string state)
         {
-            Tell(INF, $"enter");
+            //Tell(INF, $"enter");
 
             int i = 5;
             var task = Task.Run(() => { return SyncFunction(state); });
@@ -381,16 +425,16 @@ Task t = Task.Run(async () =>
             // a synchronous function - runs in new thread
             int SyncFunction(string s)
             {
-                Tell(INF, $"enter SyncFunction");
+                //Tell(INF, $"enter SyncFunction");
                 return s.Length + i;
             }
 
-            Tell(INF, $"100");
+            //Tell(INF, $"100");
 
             // run calculate as async - returns int answer
             var myOutput = await task;
 
-            Tell(INF, $"exit [{myOutput}]");
+            //Tell(INF, $"exit [{myOutput}]");
         }
     }
 
@@ -398,7 +442,10 @@ Task t = Task.Run(async () =>
     {
         public void Go()
         {
-            void Callback() { Tell(INF, "Callback()"); }
+            void Callback()
+            {
+                //Tell(INF, "Callback()");
+            }
 
             int id = 1;
             List<Worker> workers = [new(id++), new(id++), new(id++)];
@@ -407,7 +454,7 @@ Task t = Task.Run(async () =>
 
             Task.WhenAll(tasks).ContinueWith(task => Callback());
 
-            Tell(INF, "Waiting");
+            //Tell(INF, "Waiting");
 
             // TODO stuff like this:
             // using CancellationTokenSource ts = new();
@@ -418,70 +465,47 @@ Task t = Task.Run(async () =>
             // Task.WaitAll([taskKeyboard, taskComm]);
         }
     }
+    #endregion
 
-    class AsyncSocket // TODO1 dev and migrate to nterm
+    class OtherNotUseful
     {
-        //  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
-        const int packet_length = 2;  // user defined packet length
-
-        void DoAsync()
+        static async Task Main_not()
         {
-            RunServerAsync();
+            using var cts = new CancellationTokenSource();
+
+            // Fire off multiple long-running async background operations
+            Task task1 = RunBackgroundConsumerAsync("Consumer-A", cts.Token);
+            Task task2 = RunBackgroundConsumerAsync("Consumer-B", cts.Token);
+
+            Console.WriteLine("Press any key to stop the background operations...");
+            Console.ReadKey();
+
+            // Gracefully cancel the long-running loops
+            cts.Cancel();
+
+            // Wait for all loops to wrap up cleanly
+            await Task.WhenAll(task1, task2);
+            Console.WriteLine("All threads/tasks cleanly stopped.");
         }
 
-        async void RunServerAsync()
+        static async Task RunBackgroundConsumerAsync(string name, CancellationToken token)
         {
-            var listner = new TcpListener(IPAddress.Any, 59120);
-            listner.Start();
-            try
+            while (!token.IsCancellationRequested)
             {
-                while (true)
+                try
                 {
-                    // was await Accept(await listner.AcceptTcpClientAsync());
-                    TcpClient client = await listner.AcceptTcpClientAsync();
-                    await Accept(client);
-                }
-            }
-            finally
-            {
-                listner.Stop();
-            }
-        }
+                    // Simulate an I/O bound wait (polling a queue, listening to API)
+                    // Use Task.Delay, NEVER Thread.Sleep inside an async method
+                    await Task.Delay(1000, token);
 
-        async Task Accept(TcpClient client)
-        {
-            await Task.Yield();
-            try
-            {
-                using (client)
-                using (NetworkStream n = client.GetStream())
+                    Console.WriteLine($"[{name}] processed a batch at {DateTime.Now:HH:mm:ss}");
+                }
+                catch (OperationCanceledException)
                 {
-                    byte[] data = new byte[packet_length];
-                    int bytesRead = 0;
-                    int chunkSize = 1;
-
-                    while (bytesRead < data.Length && chunkSize > 0)
-                    {
-                        bytesRead += chunkSize = await n.ReadAsync(data, bytesRead, data.Length - bytesRead);
-                    }
-
-                    // get data
-                    string str = Encoding.Default.GetString(data);
-                    Console.WriteLine("[server] received : {0}", str);
-
-                    // To do
-                    // ...
-
-                    // send the result to client
-                    string send_str = "server_send_test";
-                    byte[] send_data = Encoding.ASCII.GetBytes(send_str);
-                    await n.WriteAsync(send_data, 0, send_data.Length);
+                    // This is expected when token.IsCancellationRequested triggers
+                    break;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
             }
         }
     }
-}    
+}

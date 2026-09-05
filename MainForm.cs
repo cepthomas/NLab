@@ -18,7 +18,7 @@ using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
 using W32 = Ephemera.Win32.Internals;
 using WM = Ephemera.Win32.WindowManagement;
-using static NLab.Utils;
+//using static NLab.Utils;
 
 
 //public List<string> Dump()
@@ -44,14 +44,13 @@ namespace NLab
         //[TypeConverter(typeof(ExpandableObjectConverter))]
         public HotKey HotKey { get; set; } = new();
 
-
         public MainForm(string[] args)
         {
             InitializeComponent();
 
             Move += (sender, e) => { Text = $"L:{Left} T:{Top} W:{Width} H:{Height}"; };
 
-            //BtnAsync.Click += AsyncClick;
+            BtnAsync.Click += AsyncClick;
             //BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
             //BtnJumplist.Click += JumplistClick;
@@ -127,6 +126,15 @@ namespace NLab
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="s"></param>
+        void Tell(string s)
+        {
+            Output.Append(s);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         void AddHotKey(HotKey hk)
         {
             // Listen for hot keys.
@@ -138,13 +146,25 @@ namespace NLab
             W32.RegisterHotKey(Handle, key, mod);
         }
 
+        async void AsyncClick(object? sender, EventArgs e)
+        {
+            Tell($"AsyncClick start");
+            NewBGW bgw = new();
+            await bgw.Run(3);
+            Tell($"AsyncClick end");
+
+            //Reset();
+            //var x = new AsyncAwait();
+            //var res = await x.Go();
+            //Tell(INF, $"res:{res}");
+        }
+
         /// <summary>
         /// 
         /// </summary>
         void TracerClick(object? sender, EventArgs e)
         {
-            Reset();
-            var x = new TracerPlay();
+            var x = new TracerTest();
             x.Go(12.34, new(50, 60, 70, 80));
             x.PlayWithAttribute();
         }
@@ -166,11 +186,11 @@ namespace NLab
                 {
                    case W32.HSHELL_WINDOWCREATED:
                        WM.AppWindowInfo wi = WM.GetAppWindowInfo(handle);
-                       tvOutput.Append($"WindowCreatedEvent:{handle} {wi.Title}");
+                       Output.Append($"WindowCreatedEvent:{handle} {wi.Title}");
                        break;
 
                    case W32.HSHELL_WINDOWDESTROYED:
-                       tvOutput.Append($"WindowDestroyedEvent:{handle}");
+                       Output.Append($"WindowDestroyedEvent:{handle}");
                        break;
                 }
             }
@@ -188,7 +208,7 @@ namespace NLab
 
                if ((key != Keys.None) && (mod & W32.MOD_ALT) > 0 && (mod & W32.MOD_CTRL) > 0)
                {
-                    tvOutput.Append($"Hotkey:{key}");
+                    Output.Append($"Hotkey:{key}");
                    //switch (key) etc...
                }
             }
@@ -196,7 +216,7 @@ namespace NLab
             base.WndProc(ref message);
         }
 
-#if _OTHER
+        #if _OTHER_KBDHOOK
         /// <summary>
         /// Low level keyboard hook function. Other way to implement hotkeys - from WinClip
         /// </summary>
@@ -229,63 +249,55 @@ namespace NLab
                return W32.CallNextHookEx(_hHook, code, wParam, ref lParam);
            }
         }
-#endif
+        #endif
         #endregion
     }
 
-    class TracerPlay // TODO1 put in NBOT test?
+    #region Bits and pieces
+    /// <summary>Custom rectangle for this application.</summary>
+    public class DisplayRect
     {
-        public int Go(double dval, Rectangle rect)
+        public int Left { get; init; } = -1;
+        public int Top { get; init; } = -1;
+        public int Right { get; init; } = -1;
+        public int Bottom { get; init; } = -1;
+        public Rectangle WinRect { get { return new Rectangle(Left, Top, Right - Left, Bottom - Top); } }
+        public bool IsValid { get; init; } = false;
+
+        /// <summary>Default constructor - invalid.</summary>
+        public DisplayRect()
         {
-            using var tr = new Tracer();
-
-            // Check args.
-            tr.Assert(dval == 6.7); // false - fail
-            tr.Assert(rect.Height == 999); // false - fail
-
-            var m1res = TestMethod1("here-we-go", new(10101));
-
-            var m2res = TestMethod1("try-again", new(20202));
-
-            var res = m2res - m1res;
-            tr.Assert(res == 543); // false - fail
-
-            tr.Assert(m1res < m2res); // false - fail
-
-            tr.Info($"more asserts");
-            List<int>? ls = [23, 4, 695, 81, -34, 10000];
-            tr.Assert(ls == null); // false - fail
-            tr.Assert(ls != null); // true - pass
-            tr.Assert(ls[1] == 4, ls[1]); // true - pass
-            tr.Assert(ls[2] == 696, ls[2]); // false - fail
-
-            tr.Info($">>> Leaving");
-
-            return res;
+            IsValid = false;
         }
 
-        [TracerMethod("Tracer testing level 1", 707)]
-        public int TestMethod1(string s, Worker w)
+        /// <summary>Normal constructor.</summary>
+        public DisplayRect(int left, int top, int width, int height)
         {
-            using var tr = new Tracer();
-
-            tr.Info($"entry s:{s} w:{w.Name}");
-
-            // do something
-            s = new string(s.Reverse().ToArray());
-
-            tr.Info($"exit s:{s}");
-
-            return s.Length;
+            IsValid = top >= 0 && left >= 0 && width >= 0 && height >= 0;
+            if (!IsValid) throw new ArgumentException("Invalid args");
+            Left = left;
+            Top = top;
+            Right = left + width;
+            Bottom = top + height;
         }
 
-        public void PlayWithAttribute()
+        /// <summary>Read me.</summary>
+        public override string ToString()
         {
-            var info = typeof(TracerPlay).GetMember("TestMethod1");
-            var attr = info[0].GetCustomAttribute<TracerMethodAttribute>();
-            Tell(INF, $"{attr.Num}:{attr.Message}", 2);
+            return IsValid ? $"L:{Left} T:{Top} R:{Right} B:{Bottom}" : "Invalid";
         }
     }
+
+    [Serializable]
+    public sealed class HotKey
+    {
+        public string Key { get; set; } = "?";
+        public bool Ctrl { get; set; } = false;
+        public bool Alt { get; set; } = false;
+        public bool Shift { get; set; } = false;
+        public bool Win { get; set; } = false;
+    }
+    #endregion
 
     class DelegateLambda // TODO1 absorb
     {
@@ -326,30 +338,5 @@ namespace NLab
         // // You cannot pass in a lambda expression that has no parameters or a method that has no parameters. These are not allowed:
         // Test(() => String.Empty); // Not allowed, lambda must match signature
         // Test(D2); // Not allowed, method must match signature
-    }
-
-    // General purpose target class for tests. TODO1?
-    class Worker(int id)
-    {
-        public string Name { get { return $"Worker{_id}"; } }
-
-        int _id = id;
-
-        public Task DoWorkAsync(string data)
-        {
-            Tell(INF, $"enter [{data}]");
-            // Task.Run() runs sync code asynchronously.
-            var t = Task.Run(() => DoWork(data));
-            Tell(INF, $"exit");
-            return t;
-        }
-
-        // sync do work
-        public void DoWork(string data)
-        {
-            Tell(INF, $"enter [{data}]");
-            SyncTimeEater(100 * _id);
-            Tell(INF, $"exit");
-        }
     }
 }

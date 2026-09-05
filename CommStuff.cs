@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Ephemera.NBagOfTricks;
 
 
@@ -15,7 +16,161 @@ using Ephemera.NBagOfTricks;
 
 namespace NLab
 {
-    public class TcpServer
+    class TcpServerAsync
+    {
+        //  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
+        const int packet_length = 2;  // user defined packet length
+
+        void DoAsync()
+        {
+            RunServerAsync();
+        }
+
+        async void RunServerAsync()
+        {
+            var listner = new TcpListener(IPAddress.Any, 59120);
+            listner.Start();
+            try
+            {
+                while (true)
+                {
+                    // was await Accept(await listner.AcceptTcpClientAsync());
+                    TcpClient client = await listner.AcceptTcpClientAsync();
+                    await Accept(client);
+                }
+            }
+            finally
+            {
+                listner.Stop();
+            }
+        }
+
+        async Task Accept(TcpClient client)
+        {
+            await Task.Yield();
+            try
+            {
+                using (client)
+                using (NetworkStream n = client.GetStream())
+                {
+                    byte[] data = new byte[packet_length];
+                    int bytesRead = 0;
+                    int chunkSize = 1;
+
+                    while (bytesRead < data.Length && chunkSize > 0)
+                    {
+                        bytesRead += chunkSize = await n.ReadAsync(data, bytesRead, data.Length - bytesRead);
+                    }
+
+                    // get data
+                    string str = Encoding.Default.GetString(data);
+                    Console.WriteLine("[server] received : {0}", str);
+
+                    // To do
+                    // ...
+
+                    // send the result to client
+                    string send_str = "server_send_test";
+                    byte[] send_data = Encoding.ASCII.GetBytes(send_str);
+                    await n.WriteAsync(send_data, 0, send_data.Length);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+
+    class TcpClientAsync
+    {
+        public async Task GoGo() // ==> was Main(string[] args)
+        {
+            string _host = "aaaa";
+            int _port = 90909;
+
+            using var cts = new CancellationTokenSource();
+
+            // Handle Ctrl+C gracefully
+            Console.CancelKeyPress += (s, e) =>
+            {
+                e.Cancel = true;
+                cts.Cancel();
+            };
+
+            try
+            {
+                await RunClientAsync(_host, _port, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Client shutdown initiated by user.");
+            }
+        }
+
+        async Task RunClientAsync(string ip, int port, CancellationToken cancellationToken)
+        {
+            // 1. Instantiate and connect asynchronously
+            using TcpClient client = new TcpClient();
+            Console.WriteLine($"Connecting to {ip}:{port}...");
+            await client.ConnectAsync(ip, port, cancellationToken);
+            Console.WriteLine("Connected to server!");
+
+            // 2. Get the communication stream
+            using NetworkStream stream = client.GetStream();
+
+            // 3. Start a background task to continuously read server messages
+            Task receiveTask = ReceiveMessagesAsync(stream, cancellationToken);
+
+            // 4. Main loop for sending data from console input
+            Console.WriteLine("Type messages and press Enter to send (or 'exit' to quit):");
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                string? message = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(message)) continue;
+                if (message.Equals("exit", StringComparison.OrdinalIgnoreCase)) break;
+
+                // Convert string to bytes and send
+                byte[] data = Encoding.UTF8.GetBytes(message);
+                await stream.WriteAsync(data, 0, data.Length, cancellationToken);
+            }
+
+            // Clean up connection
+            client.Close();
+        }
+
+        async Task ReceiveMessagesAsync(NetworkStream stream, CancellationToken cancellationToken)
+        {
+            byte[] buffer = new byte[1024];
+
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    // Read incoming bytes asynchronously
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+
+                    // If ReadAsync returns 0, the server closed the connection gracefully
+                    if (bytesRead == 0)
+                    {
+                        Console.WriteLine("Server disconnected.");
+                        break;
+                    }
+
+                    // Decode and print the message
+                    string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Console.WriteLine($"[Server]: {response}");
+                }
+            }
+            catch (Exception ex) when (ex is ObjectDisposedException || ex is IOException)
+            {
+                // Expected exceptions when the connection drops or is closed intentionally
+                Console.WriteLine("Connection lost.");
+            }
+        }
+    }
+
+    public class TcpServerStuff
     {
         #region Fields
         readonly string _host;
@@ -29,7 +184,7 @@ namespace NLab
         /// <param name="port"></param>
         /// <param name="delim"></param>
         /// <param name="ts"></param>
-        public TcpServer(int port, byte delim)
+        public TcpServerStuff(int port, byte delim)
         {
             _port = port;
             _delim = delim;
@@ -155,7 +310,7 @@ namespace NLab
         }
     }
 
-    public class UdpSender
+    public class UdpSenderStuff
     {
         #region Fields
         readonly string _host;
@@ -168,7 +323,7 @@ namespace NLab
         /// </summary>
         /// <param name="port"></param>
         /// <param name="delim"></param>
-        public UdpSender(int port, byte delim)
+        public UdpSenderStuff(int port, byte delim)
         {
             _port = port;
             _delim = delim;
@@ -226,175 +381,6 @@ namespace NLab
             }
 
             Console.WriteLine($"Udp done");
-        }
-    }
-
-    internal class Test
-    {
-        #region Fields
-        /// <summary>User input</summary>
-        readonly ConcurrentQueue<string> _qUserCli = new();
-
-        /// <summary>LF=10  CR=13  NUL=0</summary>
-        byte _delim = 0;
-
-        /// <summary>Config to use</summary>
-        string _configFile = "???";
-
-        /// <summary>Target executable</summary>
-        string _ntermExe = "???";
-        #endregion
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Run()
-        {
-            Console.WriteLine($"========= Test =========");
-            _configFile = Path.Combine(MiscUtils.GetSourcePath(), "test_config.ini");
-            _ntermExe = Path.Combine(MiscUtils.GetSourcePath(), "..", "bin", "net8.0-windows", "win-x64", "NTerm.exe");
-
-            using CancellationTokenSource ts = new();
-            //using Task taskKeyboard = Task.Run(() => _qUserCli.Enqueue(Console.ReadLine() ?? ""));
-
-            try
-            {
-                // Target flavors run binary NTerm.exe.
-                //DoBasicTarget(ts);
-                //DoConfigTarget(ts);
-                //DoTcpTarget(ts);
-                DoUdpTarget(ts);
-
-                // Debugger flavors require starting NTerm with matching cmd line.
-                //DoTcpDebugger(ts);
-                //DoUdpDebugger(ts);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Fatal!! {e}");
-                //Task.WaitAll([taskKeyboard]);
-            }
-        }
-
-        /// <summary>
-        /// Simple first test from cmd line. TODO also tcp/udp?
-        /// </summary>
-        void DoBasicTarget(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoBasicTarget()");
-            List<string> config = ["[nterm]", "comm = null", "delim = NUL", "prompt = >", "meta = -"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
-        }
-
-        /// <summary>
-        /// Test config functions.
-        /// </summary>
-        void DoConfigTarget(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoConfigTarget()");
-            List<string> config = [
-                "[nterm]", "comm = null", "delim = NUL", "prompt = >", "meta = -",
-                "info_color = darkcyan", "err_color = green",
-            "[macros]", "dox = \"do xxxxxxx\"", "s3 = \"hey, send 333333333\"", "tm = \"  xmagentax   -yellow-  \"",
-            "[matchers]", "\"mag\" = magenta", "\"yel\" = yellow"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
-        }
-
-        /// <summary>
-        /// Test tcp in command/response mode.
-        /// </summary>
-        void DoTcpTarget(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoTcpTarget()");
-            // Tweak config.
-            List<string> config = [
-                "[nterm]", "comm = tcp 127.0.0.1 59120", "delim = NUL", "prompt = >", "meta = -",
-                "info_color = darkcyan", "err_color = green",
-            "[macros]", "dox = \"do xxxxxxx\"", "s3 = \"hey, send 333333333\"", "tm = \"  xmagentax   -yellow-  \"",
-            "[matchers]", "\"mag\" = magenta", "\"yel\" = yellow"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
-            TcpServer srv = new(59120, _delim);
-            var err = srv.Run(ts);
-        }
-
-        /// <summary>
-        /// Test udp in continuous mode.
-        /// </summary>
-        void DoUdpTarget(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoUdpTarget()");
-            // Tweak config.
-            List<string> config = [
-                "[nterm]", "comm = udp 127.0.0.1 59140", "delim = NUL", "prompt = >", "meta = -",
-                "info_color = darkcyan", "err_color = green",
-            "[macros]", "dox = \"do xxxxxxx\"", "s3 = \"hey, send 333333333\"", "tm = \"  xmagentax   -yellow-  \"",
-            "[matchers]", "\"mag\" = magenta", "\"yel\" = yellow"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
-            UdpSender srv = new(59140, _delim);
-            srv.Run(ts);
-        }
-
-        /// <summary>
-        /// Test tcp in command/response mode.
-        /// </summary>
-        void DoTcpDebugger(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoTcpDebugger()");
-            // Runs forever.
-            TcpServer srv = new(59120, _delim);
-            srv.Run(ts);
-        }
-
-        /// <summary>
-        /// Test udp in continuous mode.
-        /// </summary>
-        void DoUdpDebugger(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoUdpDebugger()");
-            // Always do once.
-            UdpSender srv = new(59140, _delim);
-            srv.Run(ts);
-        }
-
-        /// <summary>
-        /// Run the exe with full user cli.
-        /// </summary>
-        /// <param name="args"></param>
-        Process RunTarget(string args, bool capture = false)
-        {
-            ProcessStartInfo pinfo = new(_ntermExe, args)
-            {
-                UseShellExecute = !capture,
-                RedirectStandardOutput = capture,
-                RedirectStandardError = capture,
-            };
-
-            using Process proc = new() { StartInfo = pinfo };
-
-            Console.WriteLine("Start process...");
-            proc.Start();
-
-            // if (capture)
-            // {
-            //     // TIL: To avoid deadlocks, always read the output stream first and then wait.
-            //     var stdout = proc.StandardOutput.ReadToEnd();
-            //     var stderr = proc.StandardError.ReadToEnd();
-            // }
-
-            //Console.WriteLine("Wait for exit...");
-            //proc.WaitForExit();
-            //Console.WriteLine("Exited...");
-
-            // if (capture)
-            // {
-            //     return new(proc.ExitCode, stdout, stderr);
-            // }
-
-            return proc;
         }
     }
 }

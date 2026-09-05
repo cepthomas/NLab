@@ -5,6 +5,12 @@ using System.Windows.Forms;
 
 namespace NLab
 {
+    /// <summary>Internal exception.</summary>
+    public class LabException(string msg, bool isError = true) : Exception(msg)
+    {
+        public bool IsError { get; } = isError;
+    }
+
     internal static class Program
     {
 

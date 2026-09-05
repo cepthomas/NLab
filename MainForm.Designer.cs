@@ -24,10 +24,10 @@ namespace NLab
             BtnAsync = new Button();
             BtnTasks = new Button();
             BtnTracer = new Button();
-            tvOutput = new TextViewer();
+            Output = new TextViewer();
             BtnJumplist = new Button();
             BtnTray = new Button();
-            colorWheel1 = new ColorWheel();
+            ColorWheel1 = new ColorWheel();
             SuspendLayout();
             // 
             // BtnAsync
@@ -59,16 +59,16 @@ namespace NLab
             // 
             // tvOutput
             // 
-            tvOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tvOutput.BorderStyle = BorderStyle.FixedSingle;
-            tvOutput.Location = new Point(12, 59);
-            tvOutput.MatchUseBackground = true;
-            tvOutput.MaxText = 10000;
-            tvOutput.Name = "tvOutput";
-            tvOutput.Prompt = "";
-            tvOutput.Size = new Size(508, 479);
-            tvOutput.TabIndex = 1;
-            tvOutput.WordWrap = true;
+            Output.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            Output.BorderStyle = BorderStyle.FixedSingle;
+            Output.Location = new Point(12, 59);
+            Output.MatchUseBackground = true;
+            Output.MaxText = 10000;
+            Output.Name = "tvOutput";
+            Output.Prompt = "";
+            Output.Size = new Size(508, 479);
+            Output.TabIndex = 1;
+            Output.WordWrap = true;
             // 
             // BtnJumplist
             // 
@@ -90,23 +90,23 @@ namespace NLab
             // 
             // colorWheel1
             // 
-            colorWheel1.Alpha = 1D;
-            colorWheel1.Location = new Point(536, 59);
-            colorWheel1.Name = "colorWheel1";
-            colorWheel1.Size = new Size(256, 256);
-            colorWheel1.TabIndex = 7;
+            ColorWheel1.Alpha = 1D;
+            ColorWheel1.Location = new Point(536, 59);
+            ColorWheel1.Name = "colorWheel1";
+            ColorWheel1.Size = new Size(256, 256);
+            ColorWheel1.TabIndex = 7;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(826, 546);
-            Controls.Add(colorWheel1);
+            Controls.Add(ColorWheel1);
             Controls.Add(BtnTray);
             Controls.Add(BtnJumplist);
             Controls.Add(BtnTracer);
             Controls.Add(BtnTasks);
-            Controls.Add(tvOutput);
+            Controls.Add(Output);
             Controls.Add(BtnAsync);
             Location = new Point(1000, 100);
             Name = "MainForm";
@@ -119,10 +119,10 @@ namespace NLab
 
         private Button BtnAsync;
         private Button BtnTasks;
-        private TextViewer tvOutput;
+        private TextViewer Output;
         private Button BtnTracer;
         private Button BtnJumplist;
         private Button BtnTray;
-        private ColorWheel colorWheel1;
+        private ColorWheel ColorWheel1;
     }
 }

@@ -187,7 +187,7 @@ namespace NLab
         }
 
         /// <summary>
-        /// Just for debugging.
+        /// Just for debugging. TODO1 route all other Tell() here.
         /// </summary>
         /// <param name="msg"></param>
         void Tell(string msg)
