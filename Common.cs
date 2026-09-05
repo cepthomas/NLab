@@ -12,14 +12,14 @@ using Ephemera.NBagOfUis;
 
 namespace NLab
 {
-    /// <summary>Internal exception.</summary>
-    public class LabException(string msg, bool isError = true) : Exception(msg)
-    {
-        public bool IsError { get; } = isError;
-    }
+    ///// <summary>Internal exception.</summary>
+    //public class LabException(string msg, bool isError = true) : Exception(msg)
+    //{
+    //    public bool IsError { get; } = isError;
+    //}
 
     [Serializable]
-    public sealed class HotKey
+    public sealed class HotKey_old
     {
         public string Key { get; set; } = "?";
         public bool Ctrl { get; set; } = false;
@@ -28,7 +28,7 @@ namespace NLab
         public bool Win { get; set; } = false;
     }
 
-    public static class Utils
+    public static class Utils_old
     {
         public const string ERR = "ERR";
         public const string INF = "INF";
@@ -40,7 +40,7 @@ namespace NLab
         /// <param name="cat">What</param>
         /// <param name="msg">What</param>
         /// <param name="depth">Info stack position</param>
-        public static void Tell(string cat, string msg, int depth = 2) // 2 is usual
+        public static void TellXXX(string cat, string msg, int depth = 2) // 2 is usual
         {
             var fn = "???";
             var line = -1;
@@ -89,49 +89,6 @@ namespace NLab
         {
             return (int)(1000 * (Stopwatch.GetTimestamp() - _startTick) / Stopwatch.Frequency);
         }
-
-        /// <summary>
-        /// Simulate synchronous real-world/time work. This is a bad idea except for very short delays.
-        /// </summary>
-        /// <param name="msec"></param>
-        public static void SyncTimeEater(int msec)
-        {
-            var start = Msec();
-            while (Msec() < start + msec) { }
-        }
     }
 
-    /// <summary>Custom rectangle for this application.</summary>
-    public class DisplayRect
-    {
-        public int Left { get; init; } = -1;
-        public int Top { get; init; } = -1;
-        public int Right { get; init; } = -1;
-        public int Bottom { get; init; } = -1;
-        public Rectangle WinRect { get { return new Rectangle(Left, Top, Right - Left, Bottom - Top); } }
-        public bool IsValid { get; init; } = false;
-
-        /// <summary>Default constructor - invalid.</summary>
-        public DisplayRect()
-        {
-            IsValid = false;
-        }
-
-        /// <summary>Normal constructor.</summary>
-        public DisplayRect(int left, int top, int width, int height)
-        {
-            IsValid = top >= 0 && left >= 0 && width >= 0 && height >= 0;
-            if (!IsValid) throw new ArgumentException("Invalid args");
-            Left = left;
-            Top = top;
-            Right = left + width;
-            Bottom = top + height;
-        }
-
-        /// <summary>Read me.</summary>
-        public override string ToString()
-        {
-            return IsValid ? $"L:{Left} T:{Top} R:{Right} B:{Bottom}" : "Invalid";
-        }
-    }
 }
