@@ -66,7 +66,7 @@ namespace NLab
             if (TaskbarManager.IsPlatformSupported)
             {
                 var args = Environment.GetCommandLineArgs().ToList();
-                args.ForEach(a => Tell($"arg:{a}"));
+                args.ForEach(a => Console.WriteLine($"arg:{a}"));
 
                 StartPosition = FormStartPosition.Manual;
                 Location = new Point(200, 200);
@@ -76,7 +76,7 @@ namespace NLab
             }
             else
             {
-                Tell("ERR Platform not supported");
+                Console.WriteLine("ERR Platform not supported");
                 MessageBox.Show("Your OS is no good!");
                 Environment.Exit(1);
             }
@@ -184,16 +184,6 @@ namespace NLab
 
             ///// ---> End of my stuff. Followed by builtin.
             _jl.Refresh();
-        }
-
-        /// <summary>
-        /// Just for debugging. TODO1 route all other Tell() here.
-        /// </summary>
-        /// <param name="msg"></param>
-        void Tell(string msg)
-        {
-            string s = $">{DateTime.Now:hh\\:mm\\:ss\\.fff} {msg}{Environment.NewLine}";
-            rtbInfo.AppendText(s);
         }
     }
 }

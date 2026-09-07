@@ -19,31 +19,28 @@ namespace NLab
         static int _nextid = 1;
         readonly int _id;
         readonly int _thread;
-        public List<string> Results { get; set; } = [];
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public Tracer()
         {
             _id = _nextid++;
             _thread = Environment.CurrentManagedThreadId;
-            Tell($"Tracer constructor T:{_thread}", 2);
+            Console.WriteLine($"Tracer constructor T:{_thread}");
         }
 
         ~Tracer()
         {
-            Tell($"Tracer destructor {_id} T!{_thread}", 1);
+            Console.WriteLine($"Tracer destructor {_id} T:{_thread}");
         }
 
         public void Dispose()
         {
-            Tell($"Tracer dispose {_id} T{_thread}", 1);
+            Console.WriteLine($"Tracer dispose {_id} T:{_thread}");
         }
-
-        //void Deconstruct() { }
 
         public void Info(string text)
         {
-            Tell($"INF {text}", 2);
+            Console.WriteLine($"INF {text}");
         }
 
         public void Assert(bool condition, object? actual = null, [CallerArgumentExpression(nameof(condition))] string expr = "???")
@@ -52,36 +49,13 @@ namespace NLab
             {
                 if (actual is null)
                 {
-                    Tell($"ERR {expr}", 2);
+                    Console.WriteLine($"ERR {expr}");
                 }
                 else
                 {
-                    Tell($"ERR {expr} actual:{actual}", 2);
+                    Console.WriteLine($"ERR {expr} actual:{actual}");
                 }
             }
-        }
-
-        /// <summary>Tell me something good.</summary>
-        /// <param name="msg">What</param>
-        /// <param name="depth">Info stack position. 2 is usual.</param>
-        public void Tell(string msg, int depth)
-        {
-            var fn = "???";
-            var line = -1;
-
-            // Get the caller info.
-            var st = new StackTrace(true);
-            var frm = st.GetFrame(depth);
-
-            if (frm is not null)
-            {
-                fn = Path.GetFileName(frm.GetFileName());
-                line = frm.GetFileLineNumber();
-            }
-
-            int tid = Environment.CurrentManagedThreadId;
-            var s = $"T:{tid} {fn}({line}) [{msg}]";
-            Results.Add(s);
         }
     }
 
@@ -90,52 +64,6 @@ namespace NLab
     {
         public string Message { get; } = msg;
         public int Num { get; } = num;
-    }
-
-    public static class Verify // TODO parts may be useful for tracer.
-    {
-        public static void Argument(bool condition, string message,
-            [CallerArgumentExpression("condition")] string? conditionExpression = null)
-        {
-            if (!condition) throw new ArgumentException(message: message, paramName: conditionExpression);
-        }
-
-        public static void InRange(int argument, int low, int high,
-            [CallerArgumentExpression("argument")] string? argumentExpression = null,
-            [CallerArgumentExpression("low")] string? lowExpression = null,
-            [CallerArgumentExpression("high")] string? highExpression = null)
-        {
-            if (argument < low)
-            {
-                throw new ArgumentOutOfRangeException(paramName: argumentExpression, message: $"{argumentExpression} ({argument}) cannot be less than {lowExpression} ({low}).");
-            }
-
-            if (argument > high)
-            {
-                throw new ArgumentOutOfRangeException(paramName: argumentExpression, message: $"{argumentExpression} ({argument}) cannot be greater than {highExpression} ({high}).");
-            }
-        }
-
-        public static void NotNull<T>(T argument,
-            [CallerArgumentExpression("argument")] string? argumentExpression = null)
-            where T : class
-        {
-            if (argument == null) throw new ArgumentNullException(paramName: argumentExpression);
-        }
-
-        static T Single<T>(this T[] array)
-        {
-            Verify.NotNull(array); // paramName: "array"
-            Verify.Argument(array.Length == 1, "Array must contain a single element."); // paramName: "array.Length == 1"
-            return array[0];
-        }
-
-        static T ElementAt<T>(this T[] array, int index)
-        {
-            Verify.NotNull(array);
-            Verify.InRange(index, 0, array.Length - 1);
-            return array[index];
-        }
     }
 
     public class TracerTest
@@ -188,7 +116,53 @@ namespace NLab
         {
             var info = typeof(TracerTest).GetMember("TestMethod1");
             var attr = info[0].GetCustomAttribute<TracerMethodAttribute>();
-            //Tell(INF, $"{attr.Num}:{attr.Message}", 2);
+            Console.WriteLine($"{attr.Num}:{attr.Message}");
+        }
+    }
+
+    public static class Verify // TODO parts may be useful?
+    {
+        public static void Argument(bool condition, string message,
+            [CallerArgumentExpression("condition")] string? conditionExpression = null)
+        {
+            if (!condition) throw new ArgumentException(message: message, paramName: conditionExpression);
+        }
+
+        public static void InRange(int argument, int low, int high,
+            [CallerArgumentExpression("argument")] string? argumentExpression = null,
+            [CallerArgumentExpression("low")] string? lowExpression = null,
+            [CallerArgumentExpression("high")] string? highExpression = null)
+        {
+            if (argument < low)
+            {
+                throw new ArgumentOutOfRangeException(paramName: argumentExpression, message: $"{argumentExpression} ({argument}) cannot be less than {lowExpression} ({low}).");
+            }
+
+            if (argument > high)
+            {
+                throw new ArgumentOutOfRangeException(paramName: argumentExpression, message: $"{argumentExpression} ({argument}) cannot be greater than {highExpression} ({high}).");
+            }
+        }
+
+        public static void NotNull<T>(T argument,
+            [CallerArgumentExpression("argument")] string? argumentExpression = null)
+            where T : class
+        {
+            if (argument == null) throw new ArgumentNullException(paramName: argumentExpression);
+        }
+
+        static T Single<T>(this T[] array)
+        {
+            Verify.NotNull(array); // paramName: "array"
+            Verify.Argument(array.Length == 1, "Array must contain a single element."); // paramName: "array.Length == 1"
+            return array[0];
+        }
+
+        static T ElementAt<T>(this T[] array, int index)
+        {
+            Verify.NotNull(array);
+            Verify.InRange(index, 0, array.Length - 1);
+            return array[index];
         }
     }
 }

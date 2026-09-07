@@ -68,8 +68,8 @@ namespace NLab
                 Visible = true,
                 BalloonTipText = "OK",
             };
-            _notifyIcon.MouseClick += (sender, e) => { Log($"You clicked icon:{e.Button}"); };
-            _notifyIcon.MouseDoubleClick += (sender, e) => { Log($"You double clicked icon:{e.Button}"); }; ;
+            _notifyIcon.MouseClick += (sender, e) => { Console.WriteLine($"You clicked icon:{e.Button}"); };
+            _notifyIcon.MouseDoubleClick += (sender, e) => { Console.WriteLine($"You double clicked icon:{e.Button}"); }; ;
 
             // UI form.
             _form.StartPosition = FormStartPosition.Manual;
@@ -83,7 +83,7 @@ namespace NLab
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            Log($"Dispose({disposing})");
+            Console.WriteLine($"Dispose({disposing})");
 
             if (disposing)
             {
@@ -106,7 +106,7 @@ namespace NLab
         /// <param name="e"></param>
         private void ApplicationExit_Handler(object? sender, EventArgs e)
         {
-            Log($"ApplicationExit_Handler()");
+            Console.WriteLine($"ApplicationExit_Handler()");
 
             // Causes the thread's message loop to be terminated. This will call ExitThreadCore.
             ExitThread();
@@ -119,7 +119,7 @@ namespace NLab
         /// <param name="e"></param>
         void ThreadExit_Handler(object? sender, EventArgs e)
         {
-            Log($"ThreadExit_Handler()");
+            Console.WriteLine($"ThreadExit_Handler()");
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace NLab
         /// </summary>
         protected override void ExitThreadCore()
         {
-            Log($"ExitThreadCore()");
+            Console.WriteLine($"ExitThreadCore()");
             base.ExitThreadCore();
         }
         #endregion
@@ -160,7 +160,7 @@ namespace NLab
         void Menu_Click(object? sender, EventArgs e)
         {
             var mi = (ToolStripMenuItem)sender!;
-            Log($"You clicked menu:{mi.Text}");
+            Console.WriteLine($"You clicked menu:{mi.Text}");
 
             switch (mi.Text)
             {
@@ -175,22 +175,10 @@ namespace NLab
 
                 case "exit":
                     _notifyIcon.Visible = false; // remove lingering tray icon
-                    Log($"exit");
+                    Console.WriteLine($"exit");
                     ExitThread();
                     break;
             }
-        }
-        #endregion
-
-        #region Internal Functions
-        /// <summary>
-        /// Just for debugging.
-        /// </summary>
-        /// <param name="msg"></param>
-        void Log(string msg)
-        {
-            string s = $"{DateTime.Now:mm\\:ss\\.fff} TRAY {msg}";
-            Debug.WriteLine(s);
         }
         #endregion
     }
@@ -258,7 +246,7 @@ namespace NLab
         /// <param name="e"></param>
         protected override void OnClosing(CancelEventArgs e)
         {
-            Log($"OnClosing()");
+            Console.WriteLine($"OnClosing()");
             Visible = false;
             e.Cancel = true;
 
@@ -271,7 +259,7 @@ namespace NLab
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            Log($"Dispose({disposing} {_disposed})");
+            Console.WriteLine($"Dispose({disposing} {_disposed})");
 
             if (disposing)
             {
@@ -301,18 +289,18 @@ namespace NLab
                 {
                     case (Keys.D9, W32.MOD_CTRL | W32.MOD_ALT):
                         // do something...
-                        Tell($"key:ctrl-alt-9");
+                        Console.WriteLine($"key:ctrl-alt-9");
                         handled = true;
                         break;
 
                     case (Keys.None, _):
                         // do something...
-                        Tell($"key:none");
+                        Console.WriteLine($"key:none");
                         break;
 
                     case (_, _):
                         // do something...
-                        Tell($"key:????");
+                        Console.WriteLine($"key:????");
                         break;
                 }
             }
@@ -322,27 +310,5 @@ namespace NLab
                 base.WndProc(ref msg);
             }
         }
-
-        /// <summary>
-        /// Just for debugging.
-        /// </summary>
-        /// <param name="msg"></param>
-        void Log(string msg)
-        {
-            string s = $"{DateTime.Now:mm\\:ss\\.fff} FORM {msg}";
-            Debug.WriteLine(s);
-        }
-
-        /// <summary>
-        /// Show the user.
-        /// </summary>
-        /// <param name="msg"></param>
-        void Tell(string msg)
-        {
-            string s = $"{msg}{Environment.NewLine}";
-            rtbInfo.AppendText(s);
-            rtbInfo.ScrollToCaret();
-        }
     }
-
 }

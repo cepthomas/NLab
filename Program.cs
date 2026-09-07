@@ -31,7 +31,7 @@ namespace NLab
 
             try
             {
-                var cmd = args.Count() == 0 ? "" : args[0];
+                var cmd = args.Length == 0 ? "" : args[0];
 
                 switch (cmd)
                 {

@@ -21,12 +21,11 @@ namespace NLab
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             BtnAsync = new Button();
-            BtnTasks = new Button();
+            BtnSomething = new Button();
             BtnTracer = new Button();
             Output = new TextViewer();
-            BtnJumplist = new Button();
-            BtnTray = new Button();
             ColorWheel1 = new ColorWheel();
             SuspendLayout();
             // 
@@ -39,14 +38,14 @@ namespace NLab
             BtnAsync.Text = "Async";
             BtnAsync.UseVisualStyleBackColor = true;
             // 
-            // BtnTasks
+            // BtnSomething
             // 
-            BtnTasks.Location = new Point(115, 12);
-            BtnTasks.Name = "BtnTasks";
-            BtnTasks.Size = new Size(86, 26);
-            BtnTasks.TabIndex = 2;
-            BtnTasks.Text = "Tasks";
-            BtnTasks.UseVisualStyleBackColor = true;
+            BtnSomething.Location = new Point(115, 12);
+            BtnSomething.Name = "BtnSomething";
+            BtnSomething.Size = new Size(86, 26);
+            BtnSomething.TabIndex = 2;
+            BtnSomething.Text = "Something";
+            BtnSomething.UseVisualStyleBackColor = true;
             // 
             // BtnTracer
             // 
@@ -57,58 +56,51 @@ namespace NLab
             BtnTracer.Text = "Tracer";
             BtnTracer.UseVisualStyleBackColor = true;
             // 
-            // tvOutput
+            // Output
             // 
             Output.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             Output.BorderStyle = BorderStyle.FixedSingle;
-            Output.Location = new Point(12, 59);
+            Output.Location = new Point(12, 147);
             Output.MatchUseBackground = true;
             Output.MaxText = 10000;
-            Output.Name = "tvOutput";
+            Output.Name = "Output";
             Output.Prompt = "";
-            Output.Size = new Size(508, 479);
+            Output.Size = new Size(838, 436);
             Output.TabIndex = 1;
             Output.WordWrap = true;
             // 
-            // BtnJumplist
-            // 
-            BtnJumplist.Location = new Point(329, 12);
-            BtnJumplist.Name = "BtnJumplist";
-            BtnJumplist.Size = new Size(86, 26);
-            BtnJumplist.TabIndex = 5;
-            BtnJumplist.Text = "Jumplist";
-            BtnJumplist.UseVisualStyleBackColor = true;
-            // 
-            // BtnTray
-            // 
-            BtnTray.Location = new Point(434, 12);
-            BtnTray.Name = "BtnTray";
-            BtnTray.Size = new Size(86, 26);
-            BtnTray.TabIndex = 6;
-            BtnTray.Text = "Tray";
-            BtnTray.UseVisualStyleBackColor = true;
-            // 
-            // colorWheel1
+            // ColorWheel1
             // 
             ColorWheel1.Alpha = 1D;
-            ColorWheel1.Location = new Point(536, 59);
-            ColorWheel1.Name = "colorWheel1";
-            ColorWheel1.Size = new Size(256, 256);
+            ColorWheel1.Color = Color.Black;
+            ColorWheel1.ColorStep = 4;
+            ColorWheel1.DisplayLightness = false;
+            ColorWheel1.HslColor = (HslColor)resources.GetObject("ColorWheel1.HslColor");
+            ColorWheel1.LargeChange = 5;
+            ColorWheel1.Lightness = 0.5D;
+            ColorWheel1.LineColor = Color.DimGray;
+            ColorWheel1.Location = new Point(558, 12);
+            ColorWheel1.Name = "ColorWheel1";
+            ColorWheel1.SecondarySelectionSize = 8;
+            ColorWheel1.SelectionSize = 10;
+            ColorWheel1.ShowAngleArrow = false;
+            ColorWheel1.ShowCenterLines = false;
+            ColorWheel1.ShowSaturationRing = false;
+            ColorWheel1.Size = new Size(179, 129);
+            ColorWheel1.SmallChange = 1;
             ColorWheel1.TabIndex = 7;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(826, 546);
+            ClientSize = new Size(1200, 600);
             Controls.Add(ColorWheel1);
-            Controls.Add(BtnTray);
-            Controls.Add(BtnJumplist);
             Controls.Add(BtnTracer);
-            Controls.Add(BtnTasks);
+            Controls.Add(BtnSomething);
             Controls.Add(Output);
             Controls.Add(BtnAsync);
-            Location = new Point(1000, 100);
+            Location = new Point(400, 100);
             Name = "MainForm";
             StartPosition = FormStartPosition.Manual;
             Text = "Form1";
@@ -118,11 +110,9 @@ namespace NLab
         #endregion
 
         private Button BtnAsync;
-        private Button BtnTasks;
+        private Button BtnSomething;
         private TextViewer Output;
         private Button BtnTracer;
-        private Button BtnJumplist;
-        private Button BtnTray;
         private ColorWheel ColorWheel1;
     }
 }

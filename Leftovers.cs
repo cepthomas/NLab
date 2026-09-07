@@ -12,10 +12,95 @@ using System.Threading.Tasks;
 using Ephemera.NBagOfTricks;
 
 
-// TODO1 do something?
+// TODO clean up
 
 namespace NLab
 {
+    class DelegateLambda // play?
+    {
+        // Delegates are really just structural typing for functions. You could do the same thing with nominal typing and 
+        // implementing an anonymous class that implements an interface or abstract class, but that ends up being a lot of 
+        // code when only one function is needed.
+
+        // Lambda comes from the idea of lambda calculus of Alonzo Church in the 1930s. It is an anonymous way of creating 
+        // functions. They become especially useful for composing functions
+
+        // So while some might say lambda is syntactic sugar for delegates, I would says delegates are a bridge for easing 
+        // people into lambdas in c#.
+
+        // One difference is that an anonymous delegate can omit parameters while a lambda must match the exact signature. Given:
+        public delegate string TestDelegate(int i);
+
+        public void Test(TestDelegate d) { }
+
+        // you can call it in the following four ways (note that the second line has an anonymous delegate that does not have any parameters):
+        void Callit()
+        {
+            Test(delegate (int i) { return string.Empty; });
+            Test(delegate { return string.Empty; });
+            Test(i => string.Empty);
+            Test(D);
+        }
+
+        private string D(int i)
+        {
+            return string.Empty;
+        }
+
+        private string D2()
+        {
+            return string.Empty;
+        }
+
+        // // You cannot pass in a lambda expression that has no parameters or a method that has no parameters. These are not allowed:
+        // Test(() => String.Empty); // Not allowed, lambda must match signature
+        // Test(D2); // Not allowed, method must match signature
+    }
+
+    static class Stuff
+    {
+        static void DumpStack()
+        {
+            // Get the caller info.
+            var cinfo = new List<string>();
+            var st = new StackTrace(true);
+            int index = 0;
+            while (index >= 0)
+            {
+                var frm = st.GetFrame(index);
+                if (frm == null)
+                {
+                    index = -999; // done
+                }
+                else if (frm.GetFileName() is not null && frm.HasSource())
+                {
+                    var sfrm = $"<{index}: {frm.GetMethod().Name} in {frm.GetFileName()}({frm.GetFileLineNumber()})>";
+                    cinfo.Add(sfrm);
+                    index++;
+                }
+                else
+                {
+                    index++;
+                }
+            }
+
+            var sinfo = string.Join($"{Environment.NewLine}", cinfo);
+            // _output.Append(sinfo);
+        }
+
+        public static List<string> Dump()
+        {
+           List<string> res = [];
+           //_itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
+           return res;
+        } // >>>>
+        public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
+        {
+           foreach (var item in s)
+               yield return f(item);
+        }
+    }
+    
     class NTermTest
     {
         #region Fields
@@ -23,7 +108,7 @@ namespace NLab
         readonly ConcurrentQueue<string> _qUserCli = new();
 
         /// <summary>LF=10  CR=13  NUL=0</summary>
-        byte _delim = 0;
+        readonly byte _delim = 0;
 
         /// <summary>Config to use</summary>
         string _configFile = "???";

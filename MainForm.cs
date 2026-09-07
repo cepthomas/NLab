@@ -4,34 +4,15 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
 using NAudio.Wave;
 using Ephemera.NBagOfTricks;
 using Ephemera.NBagOfUis;
 using W32 = Ephemera.Win32.Internals;
 using WM = Ephemera.Win32.WindowManagement;
-//using static NLab.Utils;
-
-
-//public List<string> Dump()
-//{
-//    List<string> res = [];
-//    _itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
-//    return res;
-//} >>>>
-//public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
-//{
-//    foreach (var item in s)
-//        yield return f(item);
-//}
 
 
 namespace NLab
@@ -44,71 +25,73 @@ namespace NLab
         //[TypeConverter(typeof(ExpandableObjectConverter))]
         public HotKey HotKey { get; set; } = new();
 
+        /// <summary>Redirect stdout.</summary>
+        public class ConsoleWriter(TextViewer output) : TextWriter
+        {
+            readonly TextViewer _output = output;
+            public override Encoding Encoding { get { return Encoding.UTF8; } }
+
+            public override void Write(char value)
+            {
+                _output.Append(value.ToString(), false);
+            }
+
+            public override void WriteLine(string? value)
+            {
+                var smin = $"{DateTime.Now:hh\\:mm\\:ss\\.fff} T[{Environment.CurrentManagedThreadId}]";
+                // Get the caller info maybe.
+                var frm = new StackTrace(true).GetFrame(3);
+                _output.Append((frm is not null && frm.GetFileName() is not null) ?
+                    $"{smin} {frm.GetFileName()}({frm.GetFileLineNumber()}) [{value}]" :
+                    $"{smin} [{value}]");
+            }
+        }
+
+        /// <summary>
+        /// Enter through here please.
+        /// </summary>
+        /// <param name="args"></param>
         public MainForm(string[] args)
         {
             InitializeComponent();
 
+            // Steal this output.
+            ConsoleWriter cw = new(Output);
+            Console.SetOut(cw);
+            Console.WriteLine("Welcome aboard!");
+
             Move += (sender, e) => { Text = $"L:{Left} T:{Top} W:{Width} H:{Height}"; };
 
-            BtnAsync.Click += AsyncClick;
-            //BtnTasks.Click += TasksClick;
             BtnTracer.Click += TracerClick;
-            //BtnJumplist.Click += JumplistClick;
-            //BtnTray.Click += TrayClick;
+            BtnAsync.Click += AsyncClick;
 
-            //// LL keyboard hook. from WinClip
+            // LL keyboard hook from WinClip
             //using Process process = Process.GetCurrentProcess();
             //IntPtr hModule = W32.GetModuleHandle(process.MainModule!.ModuleName!);
             //_hHook2 = W32.SetWindowsHookEx(W32.WH_KEYBOARD_LL, KeyboardHookProc, hModule, 0);
 
-
-            ///// Shell handlers for keys.
+            // Shell handlers for keys.
             _hHook1 = W32.RegisterShellHook(Handle);
             W32.RegisterHotKey(Handle, (int)Keys.Z, W32.MOD_ALT | W32.MOD_CTRL);
             W32.RegisterHotKey(Handle, (int)Keys.B, W32.MOD_CTRL);
         }
 
+        /// <summary>
+        /// Post-construction inits.
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnLoad(EventArgs e)
         {
             BackColor = Color.Pink;
+            ClientSize = new Size(1200, 600);
 
-            //// Add items to lv.
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    listView1.Items.Add($"Item {i} AAA BBB CCC DDD", i % 2);
-            //}
-            //listView1.View = View.List; // List  Details  LargeIcon
-
-            List<WaveInCapabilities> recin = [];
-            for (int id = -1; id < WaveIn.DeviceCount; id++) // –1 indicates the default output device, while 0 is the first output device.
-            {
-                var cap = WaveIn.GetCapabilities(id);
-                recin.Add(cap);
-
-                Debug.WriteLine($"IN: {id} {cap.ProductName}");
-            }
-
-            List<WaveOutCapabilities> recout = [];
-            for (int id = -1; id < WaveOut.DeviceCount; id++) // –1 indicates the default output device, while 0 is the first output device.
-            {
-                var cap = WaveOut.GetCapabilities(id);
-                recout.Add(cap);
-
-                Debug.WriteLine($"OUT: {id} {cap.ProductName}");
-            }
-
-            //IN: -1 Microsoft Sound Mapper
-            //IN: 0 Microphone (Realtek(R) Audio)
-            //IN: 1 Microphone Array (Intel® Smart 
-            //OUT: -1 Microsoft Sound Mapper
-            //OUT: 0 Headphones (Realtek(R) Audio)
-            //OUT: 1 Speakers (Realtek(R) Audio)
+            Output.WordWrap = false;
 
             base.OnLoad(e);
         }
 
         /// <summary>
-        ///  Clean up any resources being used.
+        /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
@@ -126,11 +109,52 @@ namespace NLab
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="s"></param>
-        void Tell(string s)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        async void AsyncClick(object? sender, EventArgs e)
         {
-            Output.Append(s);
+            try
+            {
+                Console.WriteLine($"AsyncClick start");
+
+                MyHost host = new();
+
+                //KeyEventHandler keyEventHandler = (object? sender, KeyEventArgs e) => host.Cancel();
+
+                //KeyDown += keyEventHandler;
+
+                await host.DoAsync();
+
+                //KeyDown -= keyEventHandler;
+
+                Console.WriteLine($"AsyncClick end");
+
+                //BgwHost bgw = new();
+                //await bgw.Run(3);
+
+                //Reset();
+                //var x = new AsyncAwait();
+                //var res = await x.Go();
+                //Tell(INF, $"res:{res}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"MainForm Task {ex.GetType().Name}: {ex.Message}");
+            }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void TracerClick(object? sender, EventArgs e)
+        {
+            var x = new TracerTest();
+            x.Go(12.34, new(50, 60, 70, 80));
+            x.PlayWithAttribute();
+        }
+
 
         /// <summary>
         /// 
@@ -146,27 +170,33 @@ namespace NLab
             W32.RegisterHotKey(Handle, key, mod);
         }
 
-        async void AsyncClick(object? sender, EventArgs e)
-        {
-            Tell($"AsyncClick start");
-            NewBGW bgw = new();
-            await bgw.Run(3);
-            Tell($"AsyncClick end");
-
-            //Reset();
-            //var x = new AsyncAwait();
-            //var res = await x.Go();
-            //Tell(INF, $"res:{res}");
-        }
-
         /// <summary>
         /// 
         /// </summary>
-        void TracerClick(object? sender, EventArgs e)
+        void DoAudio()
         {
-            var x = new TracerTest();
-            x.Go(12.34, new(50, 60, 70, 80));
-            x.PlayWithAttribute();
+            List<WaveInCapabilities> recin = [];
+            for (int id = -1; id < WaveIn.DeviceCount; id++) // –1 indicates the default output device, while 0 is the first output device.
+            {
+                var cap = WaveIn.GetCapabilities(id);
+                recin.Add(cap);
+                Debug.WriteLine($"IN: {id} {cap.ProductName}");
+            }
+
+            List<WaveOutCapabilities> recout = [];
+            for (int id = -1; id < WaveOut.DeviceCount; id++) // –1 indicates the default output device, while 0 is the first output device.
+            {
+                var cap = WaveOut.GetCapabilities(id);
+                recout.Add(cap);
+                Debug.WriteLine($"OUT: {id} {cap.ProductName}");
+            }
+
+            //IN: -1 Microsoft Sound Mapper
+            //IN: 0 Microphone (Realtek(R) Audio)
+            //IN: 1 Microphone Array (Intel® Smart 
+            //OUT: -1 Microsoft Sound Mapper
+            //OUT: 0 Headphones (Realtek(R) Audio)
+            //OUT: 1 Speakers (Realtek(R) Audio)
         }
 
         #region Windows hooks
@@ -298,45 +328,4 @@ namespace NLab
         public bool Win { get; set; } = false;
     }
     #endregion
-
-    class DelegateLambda // TODO1 absorb
-    {
-        // Delegates are really just structural typing for functions. You could do the same thing with nominal typing and 
-        // implementing an anonymous class that implements an interface or abstract class, but that ends up being a lot of 
-        // code when only one function is needed.
-
-        // Lambda comes from the idea of lambda calculus of Alonzo Church in the 1930s. It is an anonymous way of creating 
-        // functions. They become especially useful for composing functions
-
-        // So while some might say lambda is syntactic sugar for delegates, I would says delegates are a bridge for easing 
-        // people into lambdas in c#.
-
-        // One difference is that an anonymous delegate can omit parameters while a lambda must match the exact signature. Given:
-        public delegate string TestDelegate(int i);
-
-        public void Test(TestDelegate d) { }
-
-        // you can call it in the following four ways (note that the second line has an anonymous delegate that does not have any parameters):
-        void Callit()
-        {
-            Test(delegate (int i) { return string.Empty; });
-            Test(delegate { return string.Empty; });
-            Test(i => string.Empty);
-            Test(D);
-        }
-
-        private string D(int i)
-        {
-            return string.Empty;
-        }
-
-        private string D2()
-        {
-            return string.Empty;
-        }
-
-        // // You cannot pass in a lambda expression that has no parameters or a method that has no parameters. These are not allowed:
-        // Test(() => String.Empty); // Not allowed, lambda must match signature
-        // Test(D2); // Not allowed, method must match signature
-    }
 }

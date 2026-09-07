@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
@@ -274,7 +275,7 @@ namespace NLab
 
 
     //////////////////////////////////////////////////////////////////////////////
-    public class ColorWheel : Control //, IColorEditor
+    public class ColorWheel : Control
     {
         #region Private Fields
 
@@ -420,7 +421,7 @@ namespace NLab
                 {
                     _color = value;
 
-                    this.OnColorChanged(EventArgs.Empty);
+                    OnColorChanged(EventArgs.Empty);
                 }
             }
         }
@@ -479,6 +480,8 @@ namespace NLab
         /// Gets or sets the component color.
         /// </summary>
         /// <value>The component color.</value>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
         public virtual HslColor HslColor
         {
             get => _hslColor;
