@@ -23,7 +23,7 @@ namespace NLab
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             BtnAsync = new Button();
-            BtnSomething = new Button();
+            BtnCancel = new Button();
             BtnTracer = new Button();
             Output = new TextViewer();
             ColorWheel1 = new ColorWheel();
@@ -38,14 +38,14 @@ namespace NLab
             BtnAsync.Text = "Async";
             BtnAsync.UseVisualStyleBackColor = true;
             // 
-            // BtnSomething
+            // BtnCancel
             // 
-            BtnSomething.Location = new Point(115, 12);
-            BtnSomething.Name = "BtnSomething";
-            BtnSomething.Size = new Size(86, 26);
-            BtnSomething.TabIndex = 2;
-            BtnSomething.Text = "Something";
-            BtnSomething.UseVisualStyleBackColor = true;
+            BtnCancel.Location = new Point(115, 12);
+            BtnCancel.Name = "BtnCancel";
+            BtnCancel.Size = new Size(86, 26);
+            BtnCancel.TabIndex = 2;
+            BtnCancel.Text = "Cancel";
+            BtnCancel.UseVisualStyleBackColor = true;
             // 
             // BtnTracer
             // 
@@ -75,7 +75,6 @@ namespace NLab
             ColorWheel1.Color = Color.Black;
             ColorWheel1.ColorStep = 4;
             ColorWheel1.DisplayLightness = false;
-            ColorWheel1.HslColor = (HslColor)resources.GetObject("ColorWheel1.HslColor");
             ColorWheel1.LargeChange = 5;
             ColorWheel1.Lightness = 0.5D;
             ColorWheel1.LineColor = Color.DimGray;
@@ -97,7 +96,7 @@ namespace NLab
             ClientSize = new Size(1200, 600);
             Controls.Add(ColorWheel1);
             Controls.Add(BtnTracer);
-            Controls.Add(BtnSomething);
+            Controls.Add(BtnCancel);
             Controls.Add(Output);
             Controls.Add(BtnAsync);
             Location = new Point(400, 100);
@@ -110,7 +109,7 @@ namespace NLab
         #endregion
 
         private Button BtnAsync;
-        private Button BtnSomething;
+        private Button BtnCancel;
         private TextViewer Output;
         private Button BtnTracer;
         private ColorWheel ColorWheel1;

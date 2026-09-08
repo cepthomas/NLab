@@ -13,8 +13,6 @@ namespace NLab
 {
     // http://en.wikipedia.org/wiki/HSL_color_space
 
-
-    [Serializable]
     public struct HslColor
     {
         #region Public Fields
@@ -154,12 +152,12 @@ namespace NLab
 
         public Color ToRgbColor()
         {
-            return this.ToRgbColor(this.A);
+            return ToRgbColor(A);
         }
 
         public Color ToRgbColor(int alpha)
         {
-            return HslColor.HslToRgb(alpha, _hue, _saturation, _lightness);
+            return HslToRgb(alpha, _hue, _saturation, _lightness);
         }
 
         public override string ToString()
@@ -167,14 +165,14 @@ namespace NLab
             StringBuilder builder;
 
             builder = new StringBuilder();
-            builder.Append(this.GetType().Name);
+            builder.Append(GetType().Name);
             builder.Append(" [");
             builder.Append("H=");
-            builder.Append(this.H);
+            builder.Append(H);
             builder.Append(", S=");
-            builder.Append(this.S);
+            builder.Append(S);
             builder.Append(", L=");
-            builder.Append(this.L);
+            builder.Append(L);
             builder.Append("]");
 
             return builder.ToString();
@@ -184,7 +182,7 @@ namespace NLab
         #region Internal Methods
         internal static Color HslToRgb(double h, double s, double l)
         {
-            return HslColor.HslToRgb(255, h, s, l);
+            return HslToRgb(255, h, s, l);
         }
 
         internal static Color HslToRgb(int alpha, double h, double s, double l)
@@ -212,9 +210,9 @@ namespace NLab
                   : l + s - l * s;
                 v1 = 2 * l - v2;
 
-                r = HslColor.Clamp(255 * HslColor.HueToRgb(v1, v2, hue + 1.0f / 3));
-                g = HslColor.Clamp(255 * HslColor.HueToRgb(v1, v2, hue));
-                b = HslColor.Clamp(255 * HslColor.HueToRgb(v1, v2, hue - 1.0f / 3));
+                r = Clamp(255 * HueToRgb(v1, v2, hue + 1.0f / 3));
+                g = Clamp(255 * HueToRgb(v1, v2, hue));
+                b = Clamp(255 * HueToRgb(v1, v2, hue - 1.0f / 3));
             }
 
             return Color.FromArgb(alpha, r, g, b);
@@ -362,7 +360,6 @@ namespace NLab
         #endregion Private Fields
 
         #region Public Constructors
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ColorWheel"/> class.
         /// </summary>
@@ -459,7 +456,7 @@ namespace NLab
                 {
                     _displayLightness = value;
 
-                    this.OnDisplayLightnessChanged(EventArgs.Empty);
+                    OnDisplayLightnessChanged(EventArgs.Empty);
                 }
             }
         }
@@ -544,9 +541,9 @@ namespace NLab
                 {
                     _lineColor = value;
 
-                    this.CreateLinePen();
+                    CreateLinePen();
 
-                    this.OnLineColorChanged(EventArgs.Empty);
+                    OnLineColorChanged(EventArgs.Empty);
                 }
             }
         }
@@ -558,7 +555,7 @@ namespace NLab
             {
                 _secondaryColors = value ?? ColorWheel.GetEmptyColorArray();
 
-                this.Invalidate();
+                Invalidate();
             }
         }
 
@@ -571,7 +568,7 @@ namespace NLab
                 {
                     _secondarySelectionSize = value;
 
-                    this.OnSecondarySelectionSizeChanged(EventArgs.Empty);
+                    OnSecondarySelectionSizeChanged(EventArgs.Empty);
                 }
             }
         }
@@ -589,7 +586,7 @@ namespace NLab
                 {
                     _selectionSize = value;
 
-                    this.OnSelectionSizeChanged(EventArgs.Empty);
+                    OnSelectionSizeChanged(EventArgs.Empty);
                 }
             }
         }

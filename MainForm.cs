@@ -117,25 +117,21 @@ namespace NLab
             {
                 Console.WriteLine($"AsyncClick start");
 
+                // Current test:
                 MyHost host = new();
+                BtnCancel.Click += (object? sender, EventArgs e) => host.Cancel();
+                await host.DoTheWork();
 
-                //KeyEventHandler keyEventHandler = (object? sender, KeyEventArgs e) => host.Cancel();
-
-                //KeyDown += keyEventHandler;
-
-                await host.DoAsync();
-
-                //KeyDown -= keyEventHandler;
-
-                Console.WriteLine($"AsyncClick end");
-
+                // A test:
                 //BgwHost bgw = new();
                 //await bgw.Run(3);
 
-                //Reset();
+                // Old test:
                 //var x = new AsyncAwait();
                 //var res = await x.Go();
-                //Tell(INF, $"res:{res}");
+                //Console.WriteLine($"res:{res}");
+
+                Console.WriteLine($"AsyncClick end");
             }
             catch (Exception ex)
             {
