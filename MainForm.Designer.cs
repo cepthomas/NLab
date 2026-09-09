@@ -21,7 +21,6 @@ namespace NLab
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             BtnAsync = new Button();
             BtnCancel = new Button();
             BtnTracer = new Button();
@@ -65,7 +64,7 @@ namespace NLab
             Output.MaxText = 10000;
             Output.Name = "Output";
             Output.Prompt = "";
-            Output.Size = new Size(838, 436);
+            Output.Size = new Size(1156, 436);
             Output.TabIndex = 1;
             Output.WordWrap = true;
             // 
@@ -78,7 +77,7 @@ namespace NLab
             ColorWheel1.LargeChange = 5;
             ColorWheel1.Lightness = 0.5D;
             ColorWheel1.LineColor = Color.DimGray;
-            ColorWheel1.Location = new Point(558, 12);
+            ColorWheel1.Location = new Point(426, 12);
             ColorWheel1.Name = "ColorWheel1";
             ColorWheel1.SecondarySelectionSize = 8;
             ColorWheel1.SelectionSize = 10;
@@ -93,7 +92,7 @@ namespace NLab
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1200, 600);
+            ClientSize = new Size(1180, 600);
             Controls.Add(ColorWheel1);
             Controls.Add(BtnTracer);
             Controls.Add(BtnCancel);

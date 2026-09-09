@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Ephemera.NBagOfTricks;
 
 
-// Holding tank for socket stuff.
+// Holding tank for socket stuff. TODO1 incorporate with new async NTerm.
 
 namespace NLab
 {

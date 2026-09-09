@@ -20,7 +20,6 @@ using W32 = Ephemera.Win32.Internals;
 using WM = Ephemera.Win32.WindowManagement;
 using System.Collections.Concurrent;
 
-// TODO clean up
 
 namespace NLab_XXX
 {
@@ -500,13 +499,13 @@ namespace NLab_XXX
             }
 
             int id = 1;
-            //List<Worker> workers = [new(id++), new(id++), new(id++)];
+            List<Worker> workers = [new(id++), new(id++), new(id++)];
 
-            //var tasks = workers.Select(t => t.DoWorkAsync($"some data for {t.Name}"));
+            var tasks = workers.Select(t => t.DoWorkAsync($"some data for {t.Name}"));
 
-            //Task.WhenAll(tasks).ContinueWith(task => Callback());
+            Task.WhenAll(tasks).ContinueWith(task => Callback());
 
-            //Console.WriteLine("Waiting");
+            Console.WriteLine("Waiting");
 
             // TODO stuff like this:
             // using CancellationTokenSource ts = new();
@@ -516,6 +515,48 @@ namespace NLab_XXX
             // ts.Cancel();
             // Task.WaitAll([taskKeyboard, taskComm]);
         }
+    }
+
+
+    // General purpose target class for tests.
+    class Worker(int id)
+    {
+        public string Name { get { return $"Worker{_id}"; } }
+
+        readonly int _id = id;
+
+        public Task DoWorkAsync(string data)
+        {
+            Console.WriteLine($"enter [{data}]");
+            // Task.Run() runs sync code asynchronously.
+            var t = Task.Run(() => DoWorkSync(data));
+            Console.WriteLine($"exit");
+            return t;
+        }
+
+        // sync do work
+        public void DoWorkSync(string data)
+        {
+            Console.WriteLine($"enter [{data}]");
+            new SyncTimeEater(100 * _id);
+            Console.WriteLine($"exit");
+        }
+    }
+
+    /// <summary>Simulate synchronous real-world/time work. For test purposes only.
+    class SyncTimeEater
+    {
+        public SyncTimeEater(int msec)
+        {
+            var start = Msec();
+            while (Msec() < start + msec) { }
+        }
+
+        public static int Msec()
+        {
+            return (int)(1000 * (Stopwatch.GetTimestamp()) / Stopwatch.Frequency);
+        }
+
     }
 
     class OtherNotUseful

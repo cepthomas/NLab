@@ -20,39 +20,19 @@ using W32 = Ephemera.Win32.Internals;
 using WM = Ephemera.Win32.WindowManagement;
 using System.Collections.Concurrent;
 
-// TODO clean up
 
 namespace NLab
 {
-    #region Async background worker - practical
-    interface IComm : IDisposable
-    {
-        // change:
-        //void Run(CancellationToken token);
-        Task Run(string name, CancellationToken token, IProgress<string> progress);
-        // ok:
-        void Send(byte[] msg);
-        // remove:
-        //object? GetReceive();
-        //void Reset();
-    }
-
-
     ///// A useable comm task. /////
-    class TcpComm : IComm
+    class MyComm
     {
         readonly ConcurrentQueue<byte[]> _qSend = new();
 
         /// <summary>Constructor.</summary>
         /// <param name="config"></param>
-        public TcpComm(List<string> config)
+        public MyComm(List<string> config)
         {
             // process config
-        }
-
-        /// <summary>Clean up.</summary>
-        public void Dispose()
-        {
         }
 
         ///// IComm implementation. /////
@@ -73,137 +53,32 @@ namespace NLab
 
                 // do work
                 await Task.Delay(500, token);
-                progress.Report($"TcpComm iter{_index++}");
+                progress.Report($"{DateTime.Now:hh\\:mm\\:ss\\.fff} MyComm iter{_index++}");
 
                 // send?
                 if (_qSend.TryDequeue(out byte[]? msg))
                 {
                     // send the message
-                    progress.Report($"TcpComm send {msg}");
+                    progress.Report($"MyComm send {msg}");
                 }
 
                 if (_index >= 3)
                 {
                     // Normal-ish exit.
-                    //progress.Report($"DONE");
-                    done = true;
+                    //done = true;
 
                     // Fake error occurred.
-                    //progress.Report($"DoKeyboard blowing up...");
-                    //throw new LabException("DoKeyboard Requested to fail.");
+                    progress.Report($"MyComm Requested to fail.");
+                    throw new LabException("MyComm throw Requested to fail.");
                 }
             }
-
-            //while (!token.IsCancellationRequested)
-            //{
-            //    token.ThrowIfCancellationRequested(); // this??
-
-            //    // send?
-            //    if (_qSend.TryDequeue(out byte[]? msg))
-            //    {
-            //        // send the message
-            //    }
-
-            //    // Fake receive.
-            //    progress.Report($"TcpComm iter{_index++}");
-            //    await Task.Delay(500, token);
-            //}
         }
     }
 
-
-    ///// host impl /////
-    public class MyHost // -> partial class MainForm or App.Run()
+    ///// Infrastructure task. /////
+    class KeyboardReader
     {
-        readonly CancellationTokenSource _cts = new();
-
-        public void Cancel()
-        {
-//            _cts.Cancel();
-        }
-
-
-
-        public async Task DoTheWork()
-        {
-            try
-            {
-                //using CancellationTokenSource ctsComm = new();
-                //using CancellationTokenSource ctsKbd = new();
-
-                var _comm = new TcpComm([]);
-                //var token = _cts.Token;
-
-                ///// Hook up progress reporting. /////
-                var rxHandler = new Progress<string>(value =>
-                {
-                    Console.WriteLine($"RX:{value}");
-                });
-
-                var kbdHandler = new Progress<string>(value =>
-                {
-                    Console.WriteLine($"KB:{value}");
-                    if (value == "DONE")
-                    {
-                        Cancel();
-                        //ctsComm.Cancel();
-                        //ctsKbd.Cancel();
-                    }
-                });
-
-                // Fire off multiple long-running async background operations
-                //using Task taskKeyboard = DoKeyboard(ctsComm.Token, kbdHandler);
-                //using Task taskComm = _comm.Run("booga", ctsKbd.Token, rxHandler);
-                using Task taskKeyboard = DoKeyboard(_cts.Token, kbdHandler);
-                using Task taskComm = _comm.Run("booga", _cts.Token, rxHandler);
-
-                // Do one of these:
-                // 1) Direct user console.
-                //WriteLine("Press any key to stop the background operations...");
-                //Console.ReadKey();
-
-                // 2) Wait for all loops to wrap up cleanly.
-                //Console.WriteLine("MyHost Wait for all loops to wrap up cleanly");
-                //await Task.WhenAll(taskKeyboard, taskComm);
-                //Console.WriteLine("MyHost All threads/tasks cleanly stopped.");
-
-                Console.WriteLine("MyHost Wait for any loops to wrap up cleanly");
-                await Task.WhenAny(taskKeyboard, taskComm);
-                Console.WriteLine("MyHost Any threads/tasks cleanly stopped.");
-
-                // 3) Handle Ctrl+C gracefully.
-                //Console.CancelKeyPress += (s, e) =>
-                //{
-                //    e.Cancel = true;
-                //    _cts.Cancel();
-                //};
-
-                // 4) Explicit.
-                //Cancel();
-            }
-            //catch (ConfigException ex) // known ini error
-            //catch (IniSyntaxException ex) // known ini error
-            catch (TaskCanceledException ex)
-            {
-                Console.WriteLine($"MyHost Normal TaskCanceledException [{ex.Message}]");
-            }
-            catch (OperationCanceledException ex)
-            {
-                Console.WriteLine($"MyHost Normal?? OperationCanceledException [{ex.Message}]");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"MyHost other exception {ex.GetType().Name} [{ex.Message}]");
-            }
-            finally
-            {
-                Console.WriteLine($"MyHost _cts.Dispose()");
-//                _cts.Dispose();
-            }
-        }
-
-        ///// A local task. TODO make like comm? /////
-        public async Task DoKeyboard(CancellationToken token, IProgress<string> progress)
+        public async Task Run(CancellationToken token, IProgress<string> progress)
         {
             // store/init vars
             int _index = 0;
@@ -216,117 +91,74 @@ namespace NLab
 
                 // do work
                 await Task.Delay(1000, token);
-                progress.Report($"DoKeyboard iter{_index++}");
+                progress.Report($"{DateTime.Now:hh\\:mm\\:ss\\.fff} DoKeyboard iter{_index++}");
 
                 if (_index >= 3)
                 {
                     // Normal-ish exit.
-                    //progress.Report($"DONE");
-                    done = true;
+                    //done = true;
 
                     // Fake error occurred.
-                    //progress.Report($"DoKeyboard blowing up...");
-                    //throw new LabException("DoKeyboard Requested to fail.");
+                    progress.Report($"DoKeyboard Requested to fail.");
+                    throw new LabException("DoKeyboard throw Requested to fail.");
                 }
             }
 
+            // Tasks could handle these locally then re-throw.
+            //catch (OperationCanceledException)
+            // catch (Exception ex)
+        }
+    }
 
-
-
-#if _OPTIONS
+    ///// Host impl /////
+    public class MyHost // -> partial class MainForm or App.Run()
+    {
+        public async Task DoTheWork(CancellationToken token)
+        {
             try
             {
-                while (_index >= 0)
+                // Create tasks.
+                var _comm = new MyComm([]);
+                var _kbd = new KeyboardReader();
+
+                // Hook up progress reporting.
+                var rxHandler = new Progress<string>(value => { Console.WriteLine($"RX:{value}"); });
+                var kbdHandler = new Progress<string>(value => { Console.WriteLine($"KB:{value}"); });
+
+                // Fire off multiple long-running async background operations
+                // TIL: Don't call explicit Dispose() on tasks. That includes using ... statements.
+                // https://devblogs.microsoft.com/dotnet/do-i-need-to-dispose-of-tasks/
+                Task taskKeyboard = _kbd.Run(token, kbdHandler);
+                Task taskComm = _comm.Run("booga", token, rxHandler);
+
+                // These are forever tasks. If any stops it indicates normal shutdown or an error.
+                Console.WriteLine("MyHost Start wait for any loop to complete");
+                await Task.WhenAny(taskKeyboard, taskComm);
+                Console.WriteLine($"MyHost Some but not necessary all tasks completed kbd:{taskKeyboard.Status} comm:{taskComm.Status}");
+
+                // Check for task errors (and/or Status?) and do something with them.
+                if (taskKeyboard.Exception is not null)
                 {
-                    token.ThrowIfCancellationRequested(); // this??
-
-                    // do work
-                    await Task.Delay(1000, token);
-                    progress.Report($"DoKeyboard iter{_index++}");
-
-                    if (_index >= 3)
-                    {
-                        // Normal exit.
-                        //progress.Report($"DONE");
-
-                        // Fake error occurred.
-                        progress.Report($"DoKeyboard blowing up...");
-                        throw new OperationCanceledException("DoKeyboard Requested to fail.");
-                        //throw new InvalidOperationException("DoKeyboard Requested to fail.");
-                    }
+                    Console.WriteLine(taskKeyboard.Exception.InnerException.Message);
                 }
-
-                // original
-                // for (int i = 0; i < 100; i++)
-                // {
-                //     // 1. Check if the user requested a cancellation
-                //     cancellationToken.ThrowIfCancellationRequested();
-
-                //     // 2. Perform a chunk of heavy work
-                //     await Task.Delay(50, cancellationToken); 
-                //     Console.WriteLine($"Processing step {i}...");
-                // }
+                if (taskComm.Exception is not null)
+                {
+                    Console.WriteLine(taskComm.Exception.InnerException.Message);
+                }
             }
-
-            //catch (OperationCanceledException)
-            //{
-            //    // 3. Gracefully handle the cancellation
-            //    Console.WriteLine("DoKeyboard The operation was safely canceled.");
-            //    throw; // Re-throw if you want the caller to know it was canceled
-            //}
-
+            catch (TaskCanceledException ex)
+            {
+                Console.WriteLine($"MyHost Normal TaskCanceledException [{ex.Message}]");
+            }
+            catch (OperationCanceledException ex)
+            {
+                Console.WriteLine($"MyHost Normal?? OperationCanceledException [{ex.Message}]");
+            }
             catch (Exception ex)
             {
-                // 3. Gracefully handle the cancellation
-                Console.WriteLine($"DoKeyboard exception {ex.Message}");
-                throw; // Re-throw if you want the caller to know it was canceled
+                Console.WriteLine($"MyHost other exception {ex.GetType().Name} [{ex.Message}]");
+                Console.WriteLine(string.Join(Environment.NewLine, Stuff.DumpStack("    ")));                
             }
-#endif
         }
     }
-    #endregion
-
-    #region Helpers
-    /// <summary>Simulate synchronous real-world/time work. For test purposes only.
-    class SyncTimeEater
-    {
-        public SyncTimeEater(int msec)
-        {
-            var start = Msec();
-            while (Msec() < start + msec) { }
-        }
-
-        public static int Msec()
-        {
-            return (int)(1000 * (Stopwatch.GetTimestamp()) / Stopwatch.Frequency);
-        }
-
-    }
-
-    // General purpose target class for tests.
-    class Worker(int id)
-    {
-        public string Name { get { return $"Worker{_id}"; } }
-
-        readonly int _id = id;
-
-        public Task DoWorkAsync(string data)
-        {
-            Console.WriteLine($"enter [{data}]");
-            // Task.Run() runs sync code asynchronously.
-            var t = Task.Run(() => DoWorkSync(data));
-            Console.WriteLine($"exit");
-            return t;
-        }
-
-        // sync do work
-        public void DoWorkSync(string data)
-        {
-            Console.WriteLine($"enter [{data}]");
-            new SyncTimeEater(100 * _id);
-            Console.WriteLine($"exit");
-        }
-    }
-    #endregion
-
 }

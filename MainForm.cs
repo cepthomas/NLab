@@ -19,13 +19,23 @@ namespace NLab
 {
     public partial class MainForm : Form
     {
+        // [Serializable]
+        public sealed class HotKeyOpts
+        {
+            public string Key { get; set; } = "?";
+            public bool Ctrl { get; set; } = false;
+            public bool Alt { get; set; } = false;
+            public bool Shift { get; set; } = false;
+            public bool Win { get; set; } = false;
+        }
+
         /// <summary>Handle to the LL key hook.</summary>
         readonly IntPtr _hHook1 = IntPtr.Zero;
 
         //[TypeConverter(typeof(ExpandableObjectConverter))]
-        public HotKey HotKey { get; set; } = new();
+        public HotKeyOpts HotKey { get; set; } = new();
 
-        /// <summary>Redirect stdout.</summary>
+        /// <summary>Redirected stdout.</summary>
         public class ConsoleWriter(TextViewer output) : TextWriter
         {
             readonly TextViewer _output = output;
@@ -34,6 +44,7 @@ namespace NLab
             public override void Write(char value)
             {
                 _output.Append(value.ToString(), false);
+                Debug.Write(value.ToString());
             }
 
             public override void WriteLine(string? value)
@@ -41,9 +52,11 @@ namespace NLab
                 var smin = $"{DateTime.Now:hh\\:mm\\:ss\\.fff} T[{Environment.CurrentManagedThreadId}]";
                 // Get the caller info maybe.
                 var frm = new StackTrace(true).GetFrame(3);
-                _output.Append((frm is not null && frm.GetFileName() is not null) ?
+                var msg = (frm is not null && frm.GetFileName() is not null) ?
                     $"{smin} {frm.GetFileName()}({frm.GetFileLineNumber()}) [{value}]" :
-                    $"{smin} [{value}]");
+                    $"{smin} Unknown(0) [{value}]";
+                _output.Append(msg);
+                Debug.WriteLine(msg);
             }
         }
 
@@ -61,6 +74,13 @@ namespace NLab
             Console.WriteLine("Welcome aboard!");
 
             Move += (sender, e) => { Text = $"L:{Left} T:{Top} W:{Width} H:{Height}"; };
+
+            // 3) Handle Ctrl+C gracefully.
+            //Console.CancelKeyPress += (s, e) =>
+            //{
+            //    e.Cancel = true;
+            //    _cts.Cancel();
+            //};
 
             BtnTracer.Click += TracerClick;
             BtnAsync.Click += AsyncClick;
@@ -117,10 +137,13 @@ namespace NLab
             {
                 Console.WriteLine($"AsyncClick start");
 
+                using CancellationTokenSource cts = new();
+
                 // Current test:
                 MyHost host = new();
-                BtnCancel.Click += (object? sender, EventArgs e) => host.Cancel();
-                await host.DoTheWork();
+               // BtnCancel.Click += (object? sender, EventArgs e) => host.Cancel();
+                BtnCancel.Click += (object? sender, EventArgs e) => cts.Cancel();
+                await host.DoTheWork(cts.Token);
 
                 // A test:
                 //BgwHost bgw = new();
@@ -155,7 +178,7 @@ namespace NLab
         /// <summary>
         /// 
         /// </summary>
-        void AddHotKey(HotKey hk)
+        void AddHotKey(HotKeyOpts hk)
         {
             // Listen for hot keys.
             var key = hk.Key[0] & ~0x20; // make it UC   // high-order word
@@ -278,50 +301,4 @@ namespace NLab
         #endif
         #endregion
     }
-
-    #region Bits and pieces
-    /// <summary>Custom rectangle for this application.</summary>
-    public class DisplayRect
-    {
-        public int Left { get; init; } = -1;
-        public int Top { get; init; } = -1;
-        public int Right { get; init; } = -1;
-        public int Bottom { get; init; } = -1;
-        public Rectangle WinRect { get { return new Rectangle(Left, Top, Right - Left, Bottom - Top); } }
-        public bool IsValid { get; init; } = false;
-
-        /// <summary>Default constructor - invalid.</summary>
-        public DisplayRect()
-        {
-            IsValid = false;
-        }
-
-        /// <summary>Normal constructor.</summary>
-        public DisplayRect(int left, int top, int width, int height)
-        {
-            IsValid = top >= 0 && left >= 0 && width >= 0 && height >= 0;
-            if (!IsValid) throw new ArgumentException("Invalid args");
-            Left = left;
-            Top = top;
-            Right = left + width;
-            Bottom = top + height;
-        }
-
-        /// <summary>Read me.</summary>
-        public override string ToString()
-        {
-            return IsValid ? $"L:{Left} T:{Top} R:{Right} B:{Bottom}" : "Invalid";
-        }
-    }
-
-    [Serializable]
-    public sealed class HotKey
-    {
-        public string Key { get; set; } = "?";
-        public bool Ctrl { get; set; } = false;
-        public bool Alt { get; set; } = false;
-        public bool Shift { get; set; } = false;
-        public bool Win { get; set; } = false;
-    }
-    #endregion
 }

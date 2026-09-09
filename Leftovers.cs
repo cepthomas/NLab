@@ -12,10 +12,88 @@ using System.Threading.Tasks;
 using Ephemera.NBagOfTricks;
 
 
-// TODO clean up
+// TODO1 clean up all this
 
 namespace NLab
 {
+    static public class Stuff
+    {
+        static public List<string> DumpStack(string preamble = "")
+        {
+            // Get the caller info.
+            var cinfo = new List<string>();
+            var st = new StackTrace(true);
+            int index = 0;
+            while (index >= 0)
+            {
+                var frm = st.GetFrame(index);
+                if (frm == null)
+                {
+                    index = -999; // done
+                }
+                else if (frm.GetFileName() is not null && frm.HasSource())
+                {
+                    var sfrm = $"{preamble}{index}: {frm.GetMethod().Name} in {frm.GetFileName()}({frm.GetFileLineNumber()})";
+                    cinfo.Add(sfrm);
+                    index++;
+                }
+                else
+                {
+                    index++;
+                }
+            }
+
+            return string.Join($"{Environment.NewLine}", cinfo);
+        }
+
+        public static List<string> Dump()
+        {
+           List<string> res = [];
+           //_itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
+           return res;
+        } // >>>>
+        public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
+        {
+           foreach (var item in s)
+               yield return f(item);
+        }
+    }
+
+    /// <summary>Custom rectangle for this application.</summary>
+    public class DisplayRect
+    {
+        public int Left { get; init; } = -1;
+        public int Top { get; init; } = -1;
+        public int Right { get; init; } = -1;
+        public int Bottom { get; init; } = -1;
+        public Rectangle WinRect { get { return new Rectangle(Left, Top, Right - Left, Bottom - Top); } }
+        public bool IsValid { get; init; } = false;
+
+        /// <summary>Default constructor - invalid.</summary>
+        public DisplayRect()
+        {
+            IsValid = false;
+        }
+
+        /// <summary>Normal constructor.</summary>
+        public DisplayRect(int left, int top, int width, int height)
+        {
+            IsValid = top >= 0 && left >= 0 && width >= 0 && height >= 0;
+            if (!IsValid) throw new ArgumentException("Invalid args");
+            Left = left;
+            Top = top;
+            Right = left + width;
+            Bottom = top + height;
+        }
+
+        /// <summary>Read me.</summary>
+        public override string ToString()
+        {
+            return IsValid ? $"L:{Left} T:{Top} R:{Right} B:{Bottom}" : "Invalid";
+        }
+    }
+
+
     class DelegateLambda // play?
     {
         // Delegates are really just structural typing for functions. You could do the same thing with nominal typing and 
@@ -52,55 +130,13 @@ namespace NLab
             return string.Empty;
         }
 
-        // // You cannot pass in a lambda expression that has no parameters or a method that has no parameters. These are not allowed:
-        // Test(() => String.Empty); // Not allowed, lambda must match signature
-        // Test(D2); // Not allowed, method must match signature
+        // You cannot pass in a lambda expression that has no parameters or a method that has no parameters.
+        // These are not allowed:
+        //   Test(() => String.Empty); // Not allowed, lambda must match signature
+        //   Test(D2); // Not allowed, method must match signature
     }
 
-    static class Stuff
-    {
-        static void DumpStack()
-        {
-            // Get the caller info.
-            var cinfo = new List<string>();
-            var st = new StackTrace(true);
-            int index = 0;
-            while (index >= 0)
-            {
-                var frm = st.GetFrame(index);
-                if (frm == null)
-                {
-                    index = -999; // done
-                }
-                else if (frm.GetFileName() is not null && frm.HasSource())
-                {
-                    var sfrm = $"<{index}: {frm.GetMethod().Name} in {frm.GetFileName()}({frm.GetFileLineNumber()})>";
-                    cinfo.Add(sfrm);
-                    index++;
-                }
-                else
-                {
-                    index++;
-                }
-            }
 
-            var sinfo = string.Join($"{Environment.NewLine}", cinfo);
-            // _output.Append(sinfo);
-        }
-
-        public static List<string> Dump()
-        {
-           List<string> res = [];
-           //_itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
-           return res;
-        } // >>>>
-        public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
-        {
-           foreach (var item in s)
-               yield return f(item);
-        }
-    }
-    
     class NTermTest
     {
         #region Fields
