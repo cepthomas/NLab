@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Ephemera.NBagOfTricks;
 
 
-// Holding tank for socket stuff. TODO1 incorporate with new async NTerm.
+// Holding tank for socket stuff.
 
 namespace NLab
 {
@@ -34,7 +34,6 @@ namespace NLab
             {
                 while (true)
                 {
-                    // was await Accept(await listner.AcceptTcpClientAsync());
                     TcpClient client = await listner.AcceptTcpClientAsync();
                     await Accept(client);
                 }
@@ -78,94 +77,6 @@ namespace NLab
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }
-        }
-    }
-
-    class TcpClientAsync
-    {
-        public async Task GoGo() // ==> was Main(string[] args)
-        {
-            string _host = "aaaa";
-            int _port = 90909;
-
-            using var cts = new CancellationTokenSource();
-
-            // Handle Ctrl+C gracefully
-            Console.CancelKeyPress += (s, e) =>
-            {
-                e.Cancel = true;
-                cts.Cancel();
-            };
-
-            try
-            {
-                await RunClientAsync(_host, _port, cts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine("Client shutdown initiated by user.");
-            }
-        }
-
-        async Task RunClientAsync(string ip, int port, CancellationToken cancellationToken)
-        {
-            // 1. Instantiate and connect asynchronously
-            using TcpClient client = new TcpClient();
-            Console.WriteLine($"Connecting to {ip}:{port}...");
-            await client.ConnectAsync(ip, port, cancellationToken);
-            Console.WriteLine("Connected to server!");
-
-            // 2. Get the communication stream
-            using NetworkStream stream = client.GetStream();
-
-            // 3. Start a background task to continuously read server messages
-            Task receiveTask = ReceiveMessagesAsync(stream, cancellationToken);
-
-            // 4. Main loop for sending data from console input
-            Console.WriteLine("Type messages and press Enter to send (or 'exit' to quit):");
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                string? message = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(message)) continue;
-                if (message.Equals("exit", StringComparison.OrdinalIgnoreCase)) break;
-
-                // Convert string to bytes and send
-                byte[] data = Encoding.UTF8.GetBytes(message);
-                await stream.WriteAsync(data, 0, data.Length, cancellationToken);
-            }
-
-            // Clean up connection
-            client.Close();
-        }
-
-        async Task ReceiveMessagesAsync(NetworkStream stream, CancellationToken cancellationToken)
-        {
-            byte[] buffer = new byte[1024];
-
-            try
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    // Read incoming bytes asynchronously
-                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-
-                    // If ReadAsync returns 0, the server closed the connection gracefully
-                    if (bytesRead == 0)
-                    {
-                        Console.WriteLine("Server disconnected.");
-                        break;
-                    }
-
-                    // Decode and print the message
-                    string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Console.WriteLine($"[Server]: {response}");
-                }
-            }
-            catch (Exception ex) when (ex is ObjectDisposedException || ex is IOException)
-            {
-                // Expected exceptions when the connection drops or is closed intentionally
-                Console.WriteLine("Connection lost.");
             }
         }
     }
