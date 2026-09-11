@@ -47,13 +47,13 @@ namespace NLab
             int _index = 0;
             bool done = false;
 
-            while (!done)
+            while (!done) // !token.IsCancellationRequested
             {
                 token.ThrowIfCancellationRequested();
 
                 // do work
                 await Task.Delay(500, token);
-                progress.Report($"{DateTime.Now:hh\\:mm\\:ss\\.fff} MyComm iter{_index++}");
+                progress.Report($"MyComm iter{_index++}");
 
                 // send?
                 if (_qSend.TryDequeue(out byte[]? msg))
@@ -72,11 +72,16 @@ namespace NLab
                     throw new LabException("MyComm throw Requested to fail.");
                 }
             }
+
+            // Tasks could handle these locally then re-throw.
+            // try...
+            // catch (OperationCanceledException)
+            // catch (Exception ex)
         }
     }
 
     ///// Infrastructure task. /////
-    class KeyboardReader
+    class KbdReader
     {
         public async Task Run(CancellationToken token, IProgress<string> progress)
         {
@@ -84,14 +89,13 @@ namespace NLab
             int _index = 0;
             bool done = false;
 
-            // while (!token.IsCancellationRequested)
-            while (!done)
+            while (!done) // !token.IsCancellationRequested
             {
                 token.ThrowIfCancellationRequested();
 
                 // do work
                 await Task.Delay(1000, token);
-                progress.Report($"{DateTime.Now:hh\\:mm\\:ss\\.fff} DoKeyboard iter{_index++}");
+                progress.Report($"DoKeyboard iter{_index++}");
 
                 if (_index >= 3)
                 {
@@ -103,10 +107,6 @@ namespace NLab
                     throw new LabException("DoKeyboard throw Requested to fail.");
                 }
             }
-
-            // Tasks could handle these locally then re-throw.
-            //catch (OperationCanceledException)
-            // catch (Exception ex)
         }
     }
 
@@ -119,7 +119,7 @@ namespace NLab
             {
                 // Create tasks.
                 var _comm = new MyComm([]);
-                var _kbd = new KeyboardReader();
+                var _kbd = new KbdReader();
 
                 // Hook up progress reporting.
                 var rxHandler = new Progress<string>(value => { Console.WriteLine($"RX:{value}"); });
@@ -157,7 +157,7 @@ namespace NLab
             catch (Exception ex)
             {
                 Console.WriteLine($"MyHost other exception {ex.GetType().Name} [{ex.Message}]");
-                Console.WriteLine(string.Join(Environment.NewLine, Stuff.DumpStack("    ")));                
+                Console.WriteLine(string.Join(Environment.NewLine, Leftovers.DumpStack("    ")));                
             }
         }
     }

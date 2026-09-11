@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,11 +13,11 @@ using System.Threading.Tasks;
 using Ephemera.NBagOfTricks;
 
 
-// TODO1 clean up all this
+// TODO clean up all this
 
 namespace NLab
 {
-    static public class Stuff
+    static public class Leftovers
     {
         static public List<string> DumpStack(string preamble = "")
         {
@@ -43,7 +44,8 @@ namespace NLab
                 }
             }
 
-            return string.Join($"{Environment.NewLine}", cinfo);
+            //return string.Join($"{Environment.NewLine}", cinfo);
+            return cinfo;
         }
 
         public static List<string> Dump()
@@ -51,7 +53,8 @@ namespace NLab
            List<string> res = [];
            //_itemds.ForEach(itemd => res.Add(itemd.Item.ToString()));
            return res;
-        } // >>>>
+        }
+        // >>>>
         public static IEnumerable<U> Map<T, U>(this IEnumerable<T> s, Func<T, U> f)
         {
            foreach (var item in s)
@@ -93,8 +96,7 @@ namespace NLab
         }
     }
 
-
-    class DelegateLambda // play?
+    class DelegateLambda
     {
         // Delegates are really just structural typing for functions. You could do the same thing with nominal typing and 
         // implementing an anonymous class that implements an interface or abstract class, but that ends up being a lot of 
@@ -137,172 +139,286 @@ namespace NLab
     }
 
 
-    class NTermTest
+    class TcpServerAsync
+    {
+        //  https://stackoverflow.com/a/53403824   c# 7.0 in a nutshell
+        const int packet_length = 2;  // user defined packet length
+
+        void DoAsync()
+        {
+            RunServerAsync();
+        }
+
+        async void RunServerAsync()
+        {
+            var listner = new TcpListener(IPAddress.Any, 59120);
+            listner.Start();
+            try
+            {
+                while (true)
+                {
+                    TcpClient client = await listner.AcceptTcpClientAsync();
+                    await Accept(client);
+                }
+            }
+            finally
+            {
+                listner.Stop();
+            }
+        }
+
+        async Task Accept(TcpClient client)
+        {
+            await Task.Yield();
+            try
+            {
+                using (client)
+                using (NetworkStream n = client.GetStream())
+                {
+                    byte[] data = new byte[packet_length];
+                    int bytesRead = 0;
+                    int chunkSize = 1;
+
+                    while (bytesRead < data.Length && chunkSize > 0)
+                    {
+                        bytesRead += chunkSize = await n.ReadAsync(data, bytesRead, data.Length - bytesRead);
+                    }
+
+                    // get data
+                    string str = Encoding.Default.GetString(data);
+                    Console.WriteLine("[server] received : {0}", str);
+
+                    // To do
+                    // ...
+
+                    // send the result to client
+                    string send_str = "server_send_test";
+                    byte[] send_data = Encoding.ASCII.GetBytes(send_str);
+                    await n.WriteAsync(send_data, 0, send_data.Length);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+
+    public class TcpServerStuff
     {
         #region Fields
-        /// <summary>User input</summary>
-        readonly ConcurrentQueue<string> _qUserCli = new();
-
-        /// <summary>LF=10  CR=13  NUL=0</summary>
-        readonly byte _delim = 0;
-
-        /// <summary>Config to use</summary>
-        string _configFile = "???";
-
-        /// <summary>Target executable</summary>
-        string _ntermExe = "???";
+        readonly string _host;
+        readonly int _port;
+        readonly byte _delim;
         #endregion
 
         /// <summary>
-        /// 
+        /// Constructor.
         /// </summary>
-        public void Run()
+        /// <param name="port"></param>
+        /// <param name="delim"></param>
+        /// <param name="ts"></param>
+        public TcpServerStuff(int port, byte delim)
         {
-            Console.WriteLine($"========= Test =========");
-            _configFile = Path.Combine(MiscUtils.GetSourcePath(), "test_config.ini");
-            _ntermExe = Path.Combine(MiscUtils.GetSourcePath(), "..", "bin", "net8.0-windows", "win-x64", "NTerm.exe");
+            _port = port;
+            _delim = delim;
+            _host = "127.0.0.1";
 
-            using CancellationTokenSource ts = new();
-            //using Task taskKeyboard = Task.Run(() => _qUserCli.Enqueue(Console.ReadLine() ?? ""));
-
-            try
-            {
-                // Target flavors run binary NTerm.exe.
-                //DoBasicTarget(ts);
-                //DoConfigTarget(ts);
-                //DoTcpTarget(ts);
-                DoUdpTarget(ts);
-
-                // Debugger flavors require starting NTerm with matching cmd line.
-                //DoTcpDebugger(ts);
-                //DoUdpDebugger(ts);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Fatal!! {e}");
-                //Task.WaitAll([taskKeyboard]);
-            }
-        }
-
-        /// <summary>
-        /// Simple first test from cmd line. TODO also tcp/udp?
-        /// </summary>
-        void DoBasicTarget(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoBasicTarget()");
-            List<string> config = ["[nterm]", "comm = null", "delim = NUL", "prompt = >", "meta = -"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
-        }
-
-        /// <summary>
-        /// Test config functions.
-        /// </summary>
-        void DoConfigTarget(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoConfigTarget()");
-            List<string> config = [
-                "[nterm]", "comm = null", "delim = NUL", "prompt = >", "meta = -",
-                "info_color = darkcyan", "err_color = green",
-            "[macros]", "dox = \"do xxxxxxx\"", "s3 = \"hey, send 333333333\"", "tm = \"  xmagentax   -yellow-  \"",
-            "[matchers]", "\"mag\" = magenta", "\"yel\" = yellow"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
+            Console.WriteLine($"Tcp using {_host}:{_port}");
         }
 
         /// <summary>
         /// Test tcp in command/response mode.
         /// </summary>
-        void DoTcpTarget(CancellationTokenSource ts)
+        public bool Run(CancellationTokenSource _ts)
         {
-            Console.WriteLine($"DoTcpTarget()");
-            // Tweak config.
-            List<string> config = [
-                "[nterm]", "comm = tcp 127.0.0.1 59120", "delim = NUL", "prompt = >", "meta = -",
-                "info_color = darkcyan", "err_color = green",
-            "[macros]", "dox = \"do xxxxxxx\"", "s3 = \"hey, send 333333333\"", "tm = \"  xmagentax   -yellow-  \"",
-            "[matchers]", "\"mag\" = magenta", "\"yel\" = yellow"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
-            TcpServerStuff srv = new(59120, _delim);
-            var err = srv.Run(ts);
-        }
+            bool err = false;
 
-        /// <summary>
-        /// Test udp in continuous mode.
-        /// </summary>
-        void DoUdpTarget(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoUdpTarget()");
-            // Tweak config.
-            List<string> config = [
-                "[nterm]", "comm = udp 127.0.0.1 59140", "delim = NUL", "prompt = >", "meta = -",
-                "info_color = darkcyan", "err_color = green",
-            "[macros]", "dox = \"do xxxxxxx\"", "s3 = \"hey, send 333333333\"", "tm = \"  xmagentax   -yellow-  \"",
-            "[matchers]", "\"mag\" = magenta", "\"yel\" = yellow"];
-            File.WriteAllLines(_configFile, config);
-            var proc = RunTarget(_configFile);
-            UdpSenderStuff srv = new(59140, _delim);
-            srv.Run(ts);
-        }
-
-        /// <summary>
-        /// Test tcp in command/response mode.
-        /// </summary>
-        void DoTcpDebugger(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoTcpDebugger()");
-            // Runs forever.
-            TcpServerStuff srv = new(59120, _delim);
-            srv.Run(ts);
-        }
-
-        /// <summary>
-        /// Test udp in continuous mode.
-        /// </summary>
-        void DoUdpDebugger(CancellationTokenSource ts)
-        {
-            Console.WriteLine($"DoUdpDebugger()");
-            // Always do once.
-            UdpSenderStuff srv = new(59140, _delim);
-            srv.Run(ts);
-        }
-
-        /// <summary>
-        /// Run the exe with full user cli.
-        /// </summary>
-        /// <param name="args"></param>
-        Process RunTarget(string args, bool capture = false)
-        {
-            ProcessStartInfo pinfo = new(_ntermExe, args)
+            while (!_ts.Token.IsCancellationRequested)
             {
-                UseShellExecute = !capture,
-                RedirectStandardOutput = capture,
-                RedirectStandardError = capture,
-            };
+                try
+                {
+                    //=========== Connect ============//
+                    //https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener
 
-            using Process proc = new() { StartInfo = pinfo };
+                    using var server = TcpListener.Create(_port);
+                    server.Start();
 
-            Console.WriteLine("Start process...");
-            proc.Start();
+                    using var client = server.AcceptTcpClient(); // TODO? AcceptTcpClientAsync(token)
+                    Console.WriteLine("Client has connected");
+                    using var stream = client.GetStream();
 
-            // if (capture)
-            // {
-            //     // TIL: To avoid deadlocks, always read the output stream first and then wait.
-            //     var stdout = proc.StandardOutput.ReadToEnd();
-            //     var stderr = proc.StandardError.ReadToEnd();
-            // }
 
-            //Console.WriteLine("Wait for exit...");
-            //proc.WaitForExit();
-            //Console.WriteLine("Exited...");
+                    //=========== Receive ============//
+                    string? cmd = null;
+                    var rx = new byte[256]; // Max rx message for test.
+                    var numRead = stream.Read(rx, 0, rx.Length); // blocks
 
-            // if (capture)
-            // {
-            //     return new(proc.ExitCode, stdout, stderr);
-            // }
+                    if (numRead > 0)
+                    {
+                        for (int i = 0; i < numRead; i++)
+                        {
+                            if (rx[i] == _delim)
+                            {
+                                // Convert the received data to a string.
+                                cmd = Encoding.Default.GetString(rx, 0, i);
+                            }
+                        }
+                    }
 
-            return proc;
+
+                    //=========== Respond ============//
+                    List<string>? response = null;
+
+                    switch (cmd)
+                    {
+                        case null:
+                            response = ["Bad delimiter (probably)"];
+                            break;
+
+                        case "l": // large payload - continuous
+                            var tf = Path.Combine(MiscUtils.GetSourcePath(), "ross_2.txt");
+                            response = [.. File.ReadAllLines(tf).ToList()];
+                            break;
+
+                        case "s": // small payload
+                            response = ["Everything's not great in life, but we can still find beauty in it."];
+                            break;
+
+                        case "e": // echo
+                            response = [$"You sent [{cmd}]"];
+                            break;
+
+                        case "c": // ansi color
+                            response = [$"Colors!!! \u001b[91mRED \u001b[92mGREEN \u001b[94mBLUE \u001b[0mNONE"];
+                            break;
+
+                        case "q":
+                            response = ["Goodbye!"];
+                            _ts.Cancel();
+                            break;
+
+                        default: // Always respond with something to prevent timeouts.
+                            response = [$"Unknown cmd [{cmd}]"];
+                            break;
+                    }
+
+                    Console.WriteLine($"cmd [{cmd}] response [{response[0]}]");
+
+                    if (response is not null && response.Count > 0)
+                    {
+                        // Pace response messages. Simulates continuous operationn too.
+                        int ind = 0;
+                        while (!_ts.Token.IsCancellationRequested)
+                        {
+                            string send = response[ind];
+                            byte[] bytes = [.. Encoding.Default.GetBytes(send), _delim];
+                            stream.Write(bytes, 0, bytes.Length);
+                            ind += 1;
+                            if (ind >= response.Count)
+                            {
+                                //_ts.Cancel();
+                                break;
+                            }
+                            else
+                            {
+                                // Pacing.
+                                Thread.Sleep(ind % 10 == 0 ? 500 : 5);
+                            }
+                        }
+                    }
+
+                    // System.Threading.Thread.Sleep(10);
+                }
+                catch (Exception e)
+                {
+                    // Log, reset, keep going.
+                    Console.WriteLine($"Exception: {e}");
+                    //server?.Stop();
+                    // err = true;
+                    // _ts.Cancel();
+                }
+            }
+
+            return err;
         }
     }
+
+    public class UdpSenderStuff
+    {
+        #region Fields
+        readonly string _host;
+        readonly int _port;
+        readonly byte _delim;
+        #endregion
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="delim"></param>
+        public UdpSenderStuff(int port, byte delim)
+        {
+            _port = port;
+            _delim = delim;
+            _host = "127.0.0.1";
+
+            Console.WriteLine($"Udp using {_host}:{_port}");
+        }
+
+        /// <summary>
+        /// Do one broadcast cycle.
+        /// </summary>
+        public void Run(CancellationTokenSource ts)
+        {
+            bool done = false;
+
+            while (!done && !ts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    var tf = Path.Combine(MiscUtils.GetSourcePath(), "ross_2.txt");
+                    var lines = File.ReadAllLines(tf).ToList();
+
+                    //=========== Connect ============//
+                    using UdpClient client = new();
+                    client.Connect(_host, _port);
+                    Console.WriteLine("Client has connected");
+
+                    //=========== Send ===============//
+                    // Pace response messages to simulate continuous operationn.
+                    int ind = 0;
+                    while (!done && !ts.Token.IsCancellationRequested)
+                    {
+                        string send = lines[ind];
+                        byte[] bytes = [.. Encoding.Default.GetBytes(send), _delim];
+                        client.Send(bytes, bytes.Length);
+                        ind += 1;
+                        if (ind >= lines.Count)
+                        {
+                            done = true;
+                            //_ts.Cancel();
+                        }
+                        else
+                        {
+                            // Pacing.
+                            Thread.Sleep(ind % 10 == 0 ? 500 : 5);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Exception: {e}");
+                    done = true;
+                    // _ts.Cancel();
+                }
+            }
+
+            Console.WriteLine($"Udp done");
+        }
+    }
+
+
+
+    
 }
